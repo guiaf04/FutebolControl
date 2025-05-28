@@ -1,9 +1,9 @@
-import model.Clube;
+package model;
 
 import java.io.Serializable;
 
 /**
- * Classe SocioTorcedor - Subclasse que representa um sócio torcedor de um clube
+ * Classe model.SocioTorcedor - Subclasse que representa um sócio torcedor de um clube
  * Estende a classe model.Clube e implementa Serializable para permitir a serialização
  */
 public class SocioTorcedor extends Clube implements Serializable {

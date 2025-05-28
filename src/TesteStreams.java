@@ -1,6 +1,7 @@
 import model.Clube;
 import model.SerieA;
 import model.SerieB;
+import model.SocioTorcedor;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -73,8 +74,8 @@ public class TesteStreams implements Serializable {
                                   "Diversos", 51, 2023, 20, promovidos, rebaixados, 38);
         clubes[2] = serieB;
         
-        // SocioTorcedor
-        SocioTorcedor socio = new SocioTorcedor("Flamengo", "Rio de Janeiro", 1895, "Maracanã", 
+        // model.SocioTorcedor
+        SocioTorcedor socio = new SocioTorcedor("Flamengo", "Rio de Janeiro", 1895, "Maracanã",
                                                45, "João Silva", "123.456.789-00", "Plano Diamante", 
                                                199.90, "01/01/2023", true);
         clubes[3] = socio;

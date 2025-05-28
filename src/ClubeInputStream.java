@@ -1,6 +1,7 @@
 import model.Clube;
 import model.SerieA;
 import model.SerieB;
+import model.SocioTorcedor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,14 +95,14 @@ public class ClubeInputStream extends InputStream implements Serializable {
                     clubes[i] = serieB;
                     break;
                     
-                case 3: // Libertadores
+                case 3: // model.SerieA.Libertadores
                     // Lê a fase atual
                     int faseLength = inputStream.read();
                     byte[] faseBytes = new byte[faseLength];
                     inputStream.read(faseBytes);
                     String fase = new String(faseBytes);
                     
-                    Libertadores libertadores = new Libertadores();
+                    SerieA.Libertadores libertadores = new SerieA.Libertadores();
                     libertadores.setNome(nome);
                     libertadores.setCidade(cidade);
                     libertadores.setAnoFundacao(anoFundacao);
@@ -109,7 +110,7 @@ public class ClubeInputStream extends InputStream implements Serializable {
                     clubes[i] = libertadores;
                     break;
                     
-                case 4: // SocioTorcedor
+                case 4: // model.SocioTorcedor
                     // Lê o nome do sócio
                     int nomeSocioLength = inputStream.read();
                     byte[] nomeSocioBytes = new byte[nomeSocioLength];

@@ -1,4 +1,5 @@
 import model.Clube;
+import model.Partidas;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -12,7 +13,7 @@ import java.util.Scanner;
  * Conecta-se ao servidor e envia requisições
  */
 public class ClienteClube {
-    private static final String SERVIDOR = "localhost";
+    private static final String SERVIDOR = "192.168.0.8";
     private static final int PORTA = 12345;
     
     /**
@@ -82,8 +83,8 @@ public class ClienteClube {
                     case 2:
                         // Listar confederação
                         Object resposta2 = enviarRequisicao("LISTAR_CONFEDERACAO");
-                        if (resposta2 instanceof Confederacao) {
-                            Confederacao confederacao = (Confederacao) resposta2;
+                        if (resposta2 instanceof Partidas.Confederacao) {
+                            Partidas.Confederacao confederacao = (Partidas.Confederacao) resposta2;
                             System.out.println("\n=== Informações da Confederação ===");
                             System.out.println(confederacao.exibirInformacoes());
                             System.out.println("\n" + confederacao.listarClubesFiliados());

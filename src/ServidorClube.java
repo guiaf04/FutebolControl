@@ -18,14 +18,14 @@ import java.util.List;
 public class ServidorClube {
     private static final int PORTA = 12345;
     private List<Clube> clubes;
-    private Confederacao confederacao;
+    private Partidas.Confederacao confederacao;
     
     /**
      * Construtor da classe ServidorClube
      */
     public ServidorClube() {
         this.clubes = new ArrayList<>();
-        this.confederacao = new Confederacao("CBF", "Brasil", 1914, "Ednaldo Rodrigues");
+        this.confederacao = new Partidas.Confederacao("CBF", "Brasil", 1914, "Ednaldo Rodrigues");
         inicializarDados();
     }
     
@@ -61,7 +61,7 @@ public class ServidorClube {
         confederacao.adicionarClube(serieB);
         
         String[] paises = {"Brasil", "Argentina", "Uruguai", "Paraguai", "Chile", "Colômbia", "Equador", "Venezuela", "Bolívia", "Peru"};
-        Libertadores libertadores = new Libertadores("Copa Libertadores", "Assunção", 1960, 
+        SerieA.Libertadores libertadores = new SerieA.Libertadores("Copa model.SerieA.Libertadores", "Assunção", 1960,
                                                    "Diversos", 64, 2023, 32, paises, "Fluminense", 
                                                    "Boca Juniors", "Final");
         clubes.add(libertadores);

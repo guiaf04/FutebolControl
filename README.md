@@ -11,11 +11,11 @@ Este projeto implementa um Sistema de Controle de Clubes de Futebol em Java, seg
 ### Subclasses
 - **model.SerieA**: Representa o campeonato da Série A, estendendo model.Clube e implementando a interface model.Partidas.
 - **model.SerieB**: Representa o campeonato da Série B, estendendo model.Clube e implementando a interface model.Partidas.
-- **Libertadores**: Representa o campeonato da Libertadores, estendendo model.Clube e implementando a interface model.Partidas.
-- **SocioTorcedor**: Representa um sócio torcedor de um clube, estendendo model.Clube.
+- **model.SerieA.Libertadores**: Representa o campeonato da model.SerieA.Libertadores, estendendo model.Clube e implementando a interface model.Partidas.
+- **model.SocioTorcedor**: Representa um sócio torcedor de um clube, estendendo model.Clube.
 
 ### Agregação
-- **Confederacao**: Representa uma confederação que agrega vários clubes.
+- **model.Partidas.Confederacao**: Representa uma confederação que agrega vários clubes.
 
 ### Interface
 - **model.Partidas**: Define métodos para registrar partidas, resultados e obter informações.

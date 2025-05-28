@@ -1,6 +1,7 @@
 import model.Clube;
 import model.SerieA;
 import model.SerieB;
+import model.SocioTorcedor;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -71,7 +72,7 @@ public class ClubeOutputStream extends OutputStream implements Serializable {
             // Escreve o ano de fundação
             outputStream.write(clube.getAnoFundacao());
             
-            // Se for um campeonato (model.SerieA, model.SerieB ou Libertadores), escreve informações adicionais
+            // Se for um campeonato (model.SerieA, model.SerieB ou model.SerieA.Libertadores), escreve informações adicionais
             if (clube instanceof SerieA) {
                 SerieA serieA = (SerieA) clube;
                 outputStream.write(1); // Tipo 1 = model.SerieA
@@ -86,9 +87,9 @@ public class ClubeOutputStream extends OutputStream implements Serializable {
                 
                 // Escreve o número de equipes
                 outputStream.write(serieB.getNumeroEquipes());
-            } else if (clube instanceof Libertadores) {
-                Libertadores libertadores = (Libertadores) clube;
-                outputStream.write(3); // Tipo 3 = Libertadores
+            } else if (clube instanceof SerieA.Libertadores) {
+                SerieA.Libertadores libertadores = (SerieA.Libertadores) clube;
+                outputStream.write(3); // Tipo 3 = model.SerieA.Libertadores
                 
                 // Escreve a fase atual
                 byte[] faseBytes = libertadores.getFaseAtual().getBytes();
@@ -96,7 +97,7 @@ public class ClubeOutputStream extends OutputStream implements Serializable {
                 outputStream.write(faseBytes);
             } else if (clube instanceof SocioTorcedor) {
                 SocioTorcedor socio = (SocioTorcedor) clube;
-                outputStream.write(4); // Tipo 4 = SocioTorcedor
+                outputStream.write(4); // Tipo 4 = model.SocioTorcedor
                 
                 // Escreve o nome do sócio
                 byte[] nomeBytes2 = socio.getNome().getBytes();
