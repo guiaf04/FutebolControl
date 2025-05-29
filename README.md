@@ -25,8 +25,8 @@ Este projeto implementa um Sistema de Controle de Clubes de Futebol em Java, seg
 - **ClubeInputStream**: Estende InputStream para ler dados de clubes.
 
 ### Comunicação Cliente-Servidor
-- **ServidorClube**: Implementa um servidor para o sistema de clubes.
-- **ClienteClube**: Implementa um cliente para o sistema de clubes.
+- **TCP.ServidorClube**: Implementa um servidor para o sistema de clubes.
+- **TCP.ClienteClube**: Implementa um cliente para o sistema de clubes.
 
 ### Sistema de Votação
 - **SistemaVotacao**: Implementa um sistema de votação para clubes, utilizando comunicação unicast (TCP) e multicast (UDP).
@@ -45,8 +45,8 @@ Este projeto implementa um Sistema de Controle de Clubes de Futebol em Java, seg
 2. Execute a classe TesteStreams: `java TesteStreams`
 
 ### Servidor e Cliente
-1. Inicie o servidor: `java ServidorClube`
-2. Em outro terminal, inicie o cliente: `java ClienteClube`
+1. Inicie o servidor: `java TCP.ServidorClube`
+2. Em outro terminal, inicie o cliente: `java TCP.ClienteClube`
 
 ### Sistema de Votação
 1. Execute a classe SistemaVotacao: `java SistemaVotacao`
