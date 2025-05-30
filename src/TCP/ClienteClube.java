@@ -1,7 +1,9 @@
 package TCP;
 
 import Utils.Empacotamento;
+import model.Clube;
 import streams.ClubeInputStream;
+import streams.ClubeOutputStream;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,17 +17,20 @@ public class ClienteClube {
             int serverPort = 7896;
             s = new Socket("localhost", serverPort);
             DataInputStream in = new DataInputStream(s.getInputStream());
-            DataOutputStream out = new DataOutputStream(s.getOutputStream());
-
-            ArrayList<Object> clubes = new ArrayList<>();
-
             ClubeInputStream clubeInputStream = new ClubeInputStream(System.in);
 
-            // Serializa os objetos e grava no arquivo binário
+            ArrayList<Object> clubes = clubeInputStream.readSystem();
             byte[] conteudo = Empacotamento.serializarParaBytes(clubes);
 
+            ClubeOutputStream out = new ClubeOutputStream(
+                    clubes,
+                    clubes.size(),
+                    s.getOutputStream());
+
+            // Serializa os objetos e grava no arquivo binário
+
             System.out.println("Enviando " + conteudo.length + " bytes de dados.");
-            out.writeInt(conteudo.length);
+            out.write(conteudo.length);
 
             // 2. Enviar o ARRAY de bytes em si.
             out.write(conteudo);

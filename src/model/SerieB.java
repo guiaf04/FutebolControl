@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Classe model.SerieB - Subclasse que representa um campeonato da Série B
  * Estende a classe model.Clube e implementa Serializable para permitir a serialização
  */
-public class SerieB extends Clube implements Serializable, Campeonato {
+public class SerieB implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private int ano;
@@ -39,7 +39,6 @@ public class SerieB extends Clube implements Serializable, Campeonato {
      */
     public SerieB(String nome, String cidade, int anoFundacao, String estadio, int numeroTitulos,
                  int ano, int numeroEquipes, String[] clubesPromovidos, String[] clubesRebaixados, int rodadaAtual) {
-        super(nome, cidade, anoFundacao, estadio, numeroTitulos);
         this.ano = ano;
         this.numeroEquipes = numeroEquipes;
         this.clubesPromovidos = clubesPromovidos;
@@ -92,9 +91,8 @@ public class SerieB extends Clube implements Serializable, Campeonato {
      * Método para exibir informações do campeonato
      * @return String com informações do campeonato
      */
-    @Override
     public String exibirInformacoes() {
-        StringBuilder info = new StringBuilder(super.exibirInformacoes());
+        StringBuilder info = new StringBuilder();
         info.append("\nAno: ").append(ano);
         info.append("\nNúmero de Equipes: ").append(numeroEquipes);
         info.append("\nRodada Atual: ").append(rodadaAtual);
@@ -117,21 +115,18 @@ public class SerieB extends Clube implements Serializable, Campeonato {
     }
     
     // Implementação dos métodos da interface model.Partidas
-    @Override
     public int registrarPartida(String mandante, String visitante, String data, String local) {
         // Implementação do registro de partida para Série B
         System.out.println("Partida de Série B registrada: " + mandante + " x " + visitante);
         return (mandante + visitante + data).hashCode();
     }
     
-    @Override
     public boolean registrarResultado(int idPartida, int golsMandante, int golsVisitante) {
         // Implementação do registro de resultado para Série B
         System.out.println("Resultado registrado para partida " + idPartida + ": " + golsMandante + " x " + golsVisitante);
         return true;
     }
     
-    @Override
     public String obterInformacoesPartida(int idPartida) {
         // Implementação da obtenção de informações de partida para Série B
         return "Informações da partida " + idPartida + " do campeonato Série B";

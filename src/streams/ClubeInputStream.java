@@ -1,25 +1,28 @@
 package streams;
 
+import Utils.Desempacotamento;
 import model.*;
 
+import javax.xml.crypto.Data;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
-/**
- * Classe streams.ClubeInputStream - Subclasse de InputStream para ler dados de clubes
- * Implementa a funcionalidade de ler dados de um conjunto de objetos model.Clube
- */
 public class ClubeInputStream extends InputStream implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     private InputStream inputStream;
-    private Clube[] clubes;
+    private ArrayList<Object> clubes;
     private int numClubes;
 
 
     public ClubeInputStream(InputStream inputStream) {
         this.inputStream = inputStream;
+        this.clubes = new ArrayList<>();
     }
 
     @Override
@@ -27,100 +30,44 @@ public class ClubeInputStream extends InputStream implements Serializable {
         return inputStream.read();
     }
 
-    public Clube[] lerDados() throws IOException {
-        // Lê o número de clubes
-        numClubes = inputStream.read();
-        clubes = new Clube[numClubes];
-        
+    public ArrayList<Object> readSystem() throws IOException {
+        Scanner sc = new Scanner(inputStream);
+
+        System.out.println("Informa o número de clubes:");
+        numClubes = sc.nextInt();
+
         // Para cada clube
         for (int i = 0; i < numClubes; i++) {
+            System.out.println("Informa o nome do clube " + (i + 1) + ":");
+            String nome = sc.nextLine();
 
-            int nomeLength = inputStream.read();
-            byte[] nomeBytes = new byte[nomeLength];
-            inputStream.read(nomeBytes);
-            String nome = new String(nomeBytes);
-            
-            // Lê a cidade do clube
-            int cidadeLength = inputStream.read();
-            byte[] cidadeBytes = new byte[cidadeLength];
-            inputStream.read(cidadeBytes);
-            String cidade = new String(cidadeBytes);
-            
-            // Lê o ano de fundação
-            int anoFundacao = inputStream.read();
-            
-            // Lê o tipo de clube
-            int tipo = inputStream.read();
-            
-            // Cria o objeto apropriado com base no tipo
-            switch (tipo) {
-                case 1: // model.SerieA
-                    // Lê o campeão
-                    int campeaoLength = inputStream.read();
-                    byte[] campeaoBytes = new byte[campeaoLength];
-                    inputStream.read(campeaoBytes);
-                    String campeao = new String(campeaoBytes);
-                    
-                    SerieA serieA = new SerieA();
-                    serieA.setNome(nome);
-                    serieA.setCidade(cidade);
-                    serieA.setAnoFundacao(anoFundacao);
-                    serieA.setCampeao(campeao);
-                    clubes[i] = serieA;
-                    break;
-                    
-                case 2: // model.SerieB
-                    // Lê o número de equipes
-                    int numeroEquipes = inputStream.read();
-                    
-                    SerieB serieB = new SerieB();
-                    serieB.setNome(nome);
-                    serieB.setCidade(cidade);
-                    serieB.setAnoFundacao(anoFundacao);
-                    serieB.setNumeroEquipes(numeroEquipes);
-                    clubes[i] = serieB;
-                    break;
-                    
-                case 3: // model.SerieA.Libertadores
-                    // Lê a fase atual
-                    int faseLength = inputStream.read();
-                    byte[] faseBytes = new byte[faseLength];
-                    inputStream.read(faseBytes);
-                    String fase = new String(faseBytes);
-                    
-                    Libertadores libertadores = new Libertadores();
-                    libertadores.setNome(nome);
-                    libertadores.setCidade(cidade);
-                    libertadores.setAnoFundacao(anoFundacao);
-                    libertadores.setFaseAtual(fase);
-                    clubes[i] = libertadores;
-                    break;
-                    
-                case 4: // model.SocioTorcedor
-                    // Lê o nome do sócio
-                    int nomeSocioLength = inputStream.read();
-                    byte[] nomeSocioBytes = new byte[nomeSocioLength];
-                    inputStream.read(nomeSocioBytes);
-                    String nomeSocio = new String(nomeSocioBytes);
-                    
-                    SocioTorcedor socio = new SocioTorcedor();
-                    socio.setNome(nomeSocio);
-                    socio.setCidade(cidade);
-                    socio.setAnoFundacao(anoFundacao);
-                    clubes[i] = socio;
-                    break;
-                    
-                default: // model.Clube genérico
-                    Clube clube = new Clube();
-                    clube.setNome(nome);
-                    clube.setCidade(cidade);
-                    clube.setAnoFundacao(anoFundacao);
-                    clubes[i] = clube;
-                    break;
-            }
+            System.out.println("Informa a cidade do clube " + (i + 1) + ":");
+            String cidade = sc.nextLine();
+
+            Clube clube = new Clube();
+            clube.setNome(nome);
+            clube.setCidade(cidade);
+            clubes.add(clube);
         }
-        
+
+        sc.close();
         return clubes;
+    }
+
+    public ArrayList<Object> readTcp() throws IOException {
+        int length = inputStream.read();
+        System.out.println("Servidor: Recebendo " + length + " bytes...");
+
+        if (length > 0) {
+            // 2. Ler EXATAMENTE essa quantidade de bytes
+            byte[] dadosRecebidos = new byte[length];
+            inputStream.readNBytes(dadosRecebidos, 0, dadosRecebidos.length);
+
+            // 3. USAR O NOVO MÉTODO para desempacotar os bytes em objetos
+            System.out.println("Servidor: Desempacotando os objetos...");
+            return Desempacotamento.lerArrayDeBytes(dadosRecebidos);
+        }
+        return null;
     }
 
     @Override

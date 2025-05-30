@@ -2,6 +2,7 @@ package TCP;
 
 import Utils.Desempacotamento;
 import model.*;
+import streams.ClubeInputStream;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -16,14 +17,9 @@ import java.util.List;
 public class ServidorClube {
     private static final int PORTA = 12345;
     private List<Clube> clubes;
-    private Campeonato.Confederacao confederacao;
-    
-    /**
-     * Construtor da classe TCP.ServidorClube
-     */
+
     public ServidorClube() {
         this.clubes = new ArrayList<>();
-        this.confederacao = new Campeonato.Confederacao("CBF", "Brasil", 1914, "Ednaldo Rodrigues");
         inicializarDados();
     }
     
@@ -39,37 +35,8 @@ public class ServidorClube {
         clubes.add(flamengo);
         clubes.add(palmeiras);
         clubes.add(gremio);
-        
-        // Adiciona os clubes à confederação
-        confederacao.adicionarClube(flamengo);
-        confederacao.adicionarClube(palmeiras);
-        confederacao.adicionarClube(gremio);
-        
-        // Adiciona campeonatos
-        SerieA serieA = new SerieA("Campeonato Brasileiro Série A", "Rio de Janeiro", 1971,
-                                  "Diversos", 51, 2023, 20, "Palmeiras", "Botafogo", 38);
-        clubes.add(serieA);
-        confederacao.adicionarClube(serieA);
-        
-        String[] promovidos = {"Vitória", "Juventude", "Criciúma", "Atlético-GO"};
-        String[] rebaixados = {"Londrina", "Tombense", "Chapecoense", "ABC"};
-        SerieB serieB = new SerieB("Campeonato Brasileiro Série B", "Rio de Janeiro", 1971,
-                                  "Diversos", 51, 2023, 20, promovidos, rebaixados, 38);
-        clubes.add(serieB);
-        confederacao.adicionarClube(serieB);
-        
-        String[] paises = {"Brasil", "Argentina", "Uruguai", "Paraguai", "Chile", "Colômbia", "Equador", "Venezuela", "Bolívia", "Peru"};
-        Libertadores libertadores = new Libertadores("Copa model.SerieA.Libertadores", "Assunção", 1960,
-                                                   "Diversos", 64, 2023, 32, paises, "Fluminense", 
-                                                   "Boca Juniors", "Final");
-        clubes.add(libertadores);
-        confederacao.adicionarClube(libertadores);
     }
 
-    /**
-     * Método principal
-     * @param args Argumentos de linha de comando
-     */
     public static void main(String args[]) {
         try {
             System.out.println("Servidor iniciado");
@@ -89,14 +56,14 @@ public class ServidorClube {
 }
 
 class Connection extends Thread {
-    DataInputStream in;
+    ClubeInputStream in;
     DataOutputStream out;
     Socket clientSocket;
 
     public Connection(Socket aClientSocket) {
         try {
             clientSocket = aClientSocket;
-            in = new DataInputStream(clientSocket.getInputStream());
+            in = new ClubeInputStream(clientSocket.getInputStream());
             out = new DataOutputStream(clientSocket.getOutputStream());
             this.start();
         } catch (IOException e) {
@@ -106,29 +73,20 @@ class Connection extends Thread {
 
     public void run() {
         try {
-            // 1. Ler o TAMANHO da mensagem
-            int length = in.readInt();
-            System.out.println("Servidor: Recebendo " + length + " bytes...");
+            ArrayList<Object> listaDeClubes = in.readTcp();
+            System.out.println("Servidor: " + listaDeClubes.size() + " clubes recebidos com sucesso.");
 
-            if (length > 0) {
-                // 2. Ler EXATAMENTE essa quantidade de bytes
-                byte[] dadosRecebidos = new byte[length];
-                in.readFully(dadosRecebidos, 0, dadosRecebidos.length);
-
-                // 3. USAR O NOVO MÉTODO para desempacotar os bytes em objetos
-                System.out.println("Servidor: Desempacotando os objetos...");
-                ArrayList<Object> listaDeClientes = Desempacotamento.lerArrayDeBytes(dadosRecebidos);
-
-                // 4. Processar os dados e enviar a resposta
-                System.out.println("Servidor: " + listaDeClientes.size() + " clientes recebidos com sucesso.");
-                // Exemplo: Imprimir o nome do primeiro cliente
-                if (!listaDeClientes.isEmpty() && listaDeClientes.getFirst() instanceof Clube primeiroCliente) {
-                  System.out.println("Nome do primeiro cliente: " + primeiroCliente.getNome());
-                }
-
-                String resposta = "Servidor processou " + listaDeClientes.size() + " objetos.";
-                out.writeUTF(resposta.toUpperCase());
+            if (!listaDeClubes.isEmpty() && listaDeClubes.getFirst() instanceof Clube primeiroCliente) {
+                listaDeClubes.forEach(clube -> {
+                    if (clube instanceof Clube c) {
+                        System.out.println("Nome do clube: " + c.getNome());
+                        System.out.println("Cidade do clube: " + c.getCidade());
+                    }
+                });
             }
+
+            String resposta = "Servidor processou " + listaDeClubes.size() + " objetos.";
+            out.writeUTF(resposta.toUpperCase());
 
         } catch (IOException e) {
             System.out.println("Erro na conexão: " + e.getMessage());

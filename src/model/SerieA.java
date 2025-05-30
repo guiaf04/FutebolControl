@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class SerieA implements Serializable, Campeonato {
     private static final long serialVersionUID = 1L;
@@ -10,6 +11,7 @@ public class SerieA implements Serializable, Campeonato {
     private String campeao;
     private String viceCampeao;
     private int rodadaAtual;
+    private Map<Clube, EstatisticasClube> estatisticasClubes;
 
     public SerieA() {
         super();
@@ -23,7 +25,6 @@ public class SerieA implements Serializable, Campeonato {
         this.rodadaAtual = rodadaAtual;
     }
 
-    // Getters e Setters
     public int getAno() {
         return ano;
     }
@@ -64,7 +65,6 @@ public class SerieA implements Serializable, Campeonato {
         this.rodadaAtual = rodadaAtual;
     }
 
-    @Override
     public String exibirInformacoes() {
         return "\nAno: " + ano +
                "\nNúmero de Equipes: " + numeroEquipes +
@@ -75,18 +75,12 @@ public class SerieA implements Serializable, Campeonato {
 
     // Implementação dos métodos da interface model.Partidas
     @Override
-    public int registrarPartida(String mandante, String visitante, String data, String local) {
+    public int registrarPartida(Partida partida) {
         // Implementação do registro de partida para Série A
-        System.out.println("Partida de Série A registrada: " + mandante + " x " + visitante);
-        return (mandante + visitante + data).hashCode();
+        System.out.println("Partida de Série A registrada: " + partida.mandante + " x " + partida.visitante);
+        return (partida.mandante.toString() + partida.visitante.toString() + partida.data).hashCode();
     }
 
-    @Override
-    public boolean registrarResultado(int idPartida, int golsMandante, int golsVisitante) {
-        // Implementação do registro de resultado para Série A
-        System.out.println("Resultado registrado para partida " + idPartida + ": " + golsMandante + " x " + golsVisitante);
-        return true;
-    }
 
     @Override
     public String obterInformacoesPartida(int idPartida) {

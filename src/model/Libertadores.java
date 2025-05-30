@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Classe model.SerieA.Libertadores - Subclasse que representa o campeonato da model.SerieA.Libertadores
  * Estende a classe model.Clube e implementa Serializable para permitir a serialização
  */
-public class Libertadores extends Clube implements Serializable, Campeonato {
+public class Libertadores  implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private int ano;
@@ -20,7 +20,6 @@ public class Libertadores extends Clube implements Serializable, Campeonato {
    * Construtor padrão
    */
   public Libertadores() {
-    super();
     this.paisesParticipantes = new String[10];
   }
 
@@ -42,7 +41,6 @@ public class Libertadores extends Clube implements Serializable, Campeonato {
   public Libertadores(String nome, String cidade, int anoFundacao, String estadio, int numeroTitulos,
                       int ano, int numeroEquipes, String[] paisesParticipantes, String campeao,
                       String viceCampeao, String faseAtual) {
-    super(nome, cidade, anoFundacao, estadio, numeroTitulos);
     this.ano = ano;
     this.numeroEquipes = numeroEquipes;
     this.paisesParticipantes = paisesParticipantes;
@@ -105,9 +103,8 @@ public class Libertadores extends Clube implements Serializable, Campeonato {
    *
    * @return String com informações do campeonato
    */
-  @Override
   public String exibirInformacoes() {
-    StringBuilder info = new StringBuilder(super.exibirInformacoes());
+    StringBuilder info = new StringBuilder();
     info.append("\nAno: ").append(ano);
     info.append("\nNúmero de Equipes: ").append(numeroEquipes);
     info.append("\nCampeão: ").append(campeao);
@@ -125,21 +122,19 @@ public class Libertadores extends Clube implements Serializable, Campeonato {
   }
 
   // Implementação dos métodos da interface model.Partidas
-  @Override
+
   public int registrarPartida(String mandante, String visitante, String data, String local) {
     // Implementação do registro de partida para model.SerieA.Libertadores
     System.out.println("Partida de model.SerieA.Libertadores registrada: " + mandante + " x " + visitante);
     return (mandante + visitante + data).hashCode();
   }
 
-  @Override
   public boolean registrarResultado(int idPartida, int golsMandante, int golsVisitante) {
     // Implementação do registro de resultado para model.SerieA.Libertadores
     System.out.println("Resultado registrado para partida " + idPartida + ": " + golsMandante + " x " + golsVisitante);
     return true;
   }
 
-  @Override
   public String obterInformacoesPartida(int idPartida) {
     // Implementação da obtenção de informações de partida para model.SerieA.Libertadores
     return "Informações da partida " + idPartida + " do campeonato model.SerieA.Libertadores";
