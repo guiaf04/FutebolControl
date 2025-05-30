@@ -1,14 +1,13 @@
-import model.Clube;
-import model.SerieA;
-import model.SerieB;
-import model.SocioTorcedor;
+package streams;
+
+import model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
 /**
- * Classe ClubeInputStream - Subclasse de InputStream para ler dados de clubes
+ * Classe streams.ClubeInputStream - Subclasse de InputStream para ler dados de clubes
  * Implementa a funcionalidade de ler dados de um conjunto de objetos model.Clube
  */
 public class ClubeInputStream extends InputStream implements Serializable {
@@ -17,30 +16,17 @@ public class ClubeInputStream extends InputStream implements Serializable {
     private InputStream inputStream;
     private Clube[] clubes;
     private int numClubes;
-    
-    /**
-     * Construtor da classe ClubeInputStream
-     * @param inputStream InputStream de origem
-     */
+
+
     public ClubeInputStream(InputStream inputStream) {
         this.inputStream = inputStream;
     }
-    
-    /**
-     * Método para ler um byte do stream
-     * @return O byte lido, ou -1 se o fim do stream foi alcançado
-     * @throws IOException Se ocorrer um erro de I/O
-     */
+
     @Override
     public int read() throws IOException {
         return inputStream.read();
     }
-    
-    /**
-     * Método para ler todos os dados dos clubes do stream de origem
-     * @return Array de objetos model.Clube lidos
-     * @throws IOException Se ocorrer um erro de I/O
-     */
+
     public Clube[] lerDados() throws IOException {
         // Lê o número de clubes
         numClubes = inputStream.read();
@@ -48,7 +34,7 @@ public class ClubeInputStream extends InputStream implements Serializable {
         
         // Para cada clube
         for (int i = 0; i < numClubes; i++) {
-            // Lê o nome do clube
+
             int nomeLength = inputStream.read();
             byte[] nomeBytes = new byte[nomeLength];
             inputStream.read(nomeBytes);
@@ -102,7 +88,7 @@ public class ClubeInputStream extends InputStream implements Serializable {
                     inputStream.read(faseBytes);
                     String fase = new String(faseBytes);
                     
-                    SerieA.Libertadores libertadores = new SerieA.Libertadores();
+                    Libertadores libertadores = new Libertadores();
                     libertadores.setNome(nome);
                     libertadores.setCidade(cidade);
                     libertadores.setAnoFundacao(anoFundacao);
@@ -136,11 +122,7 @@ public class ClubeInputStream extends InputStream implements Serializable {
         
         return clubes;
     }
-    
-    /**
-     * Método para fechar o stream
-     * @throws IOException Se ocorrer um erro de I/O
-     */
+
     @Override
     public void close() throws IOException {
         inputStream.close();

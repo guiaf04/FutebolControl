@@ -2,10 +2,6 @@ package model;
 
 import java.io.Serializable;
 
-/**
- * Classe model.Clube - Superclasse que representa um clube de futebol
- * Implementa Serializable para permitir a serialização dos objetos
- */
 public class Clube implements Serializable {
     private static final long serialVersionUID = 1L;
     
@@ -14,21 +10,10 @@ public class Clube implements Serializable {
     private int anoFundacao;
     private String estadio;
     private int numeroTitulos;
-    
-    /**
-     * Construtor padrão
-     */
+
     public Clube() {
     }
-    
-    /**
-     * Construtor com parâmetros
-     * @param nome Nome do clube
-     * @param cidade Cidade sede do clube
-     * @param anoFundacao Ano de fundação do clube
-     * @param estadio Nome do estádio do clube
-     * @param numeroTitulos Número de títulos conquistados
-     */
+
     public Clube(String nome, String cidade, int anoFundacao, String estadio, int numeroTitulos) {
         this.nome = nome;
         this.cidade = cidade;

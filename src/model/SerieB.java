@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Classe model.SerieB - Subclasse que representa um campeonato da Série B
  * Estende a classe model.Clube e implementa Serializable para permitir a serialização
  */
-public class SerieB extends Clube implements Serializable, Partidas {
+public class SerieB extends Clube implements Serializable, Campeonato {
     private static final long serialVersionUID = 1L;
     
     private int ano;

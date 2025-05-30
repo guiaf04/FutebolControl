@@ -1,33 +1,25 @@
 package TCP;
 
 import Utils.Empacotamento;
-import model.Clube;
-import model.Partidas;
+import streams.ClubeInputStream;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 
-/**
- * Classe TCP.ClienteClube - Implementa um cliente para o sistema de clubes
- * Conecta-se ao servidor e envia requisições
- */
 public class ClienteClube {
     public static void main(String args[]) {
-        // arguments supply message and hostname
         Socket s = null;
         try {
             int serverPort = 7896;
-            s = new Socket("172.25.210.29", serverPort);
+            s = new Socket("localhost", serverPort);
             DataInputStream in = new DataInputStream(s.getInputStream());
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
-            String envio = "sistemas_distribuidos";
-            System.out.println("Sent: "+envio);
 
             ArrayList<Object> clubes = new ArrayList<>();
+
+            ClubeInputStream clubeInputStream = new ClubeInputStream(System.in);
 
             // Serializa os objetos e grava no arquivo binário
             byte[] conteudo = Empacotamento.serializarParaBytes(clubes);

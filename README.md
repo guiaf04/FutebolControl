@@ -21,8 +21,8 @@ Este projeto implementa um Sistema de Controle de Clubes de Futebol em Java, seg
 - **model.Partidas**: Define métodos para registrar partidas, resultados e obter informações.
 
 ### Streams Personalizados
-- **ClubeOutputStream**: Estende OutputStream para enviar dados de clubes.
-- **ClubeInputStream**: Estende InputStream para ler dados de clubes.
+- **streams.ClubeOutputStream**: Estende OutputStream para enviar dados de clubes.
+- **streams.ClubeInputStream**: Estende InputStream para ler dados de clubes.
 
 ### Comunicação Cliente-Servidor
 - **TCP.ServidorClube**: Implementa um servidor para o sistema de clubes.

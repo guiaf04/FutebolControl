@@ -1,10 +1,7 @@
 package TCP;
 
 import Utils.Desempacotamento;
-import model.Clube;
-import model.Partidas;
-import model.SerieA;
-import model.SerieB;
+import model.*;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -19,14 +16,14 @@ import java.util.List;
 public class ServidorClube {
     private static final int PORTA = 12345;
     private List<Clube> clubes;
-    private Partidas.Confederacao confederacao;
+    private Campeonato.Confederacao confederacao;
     
     /**
      * Construtor da classe TCP.ServidorClube
      */
     public ServidorClube() {
         this.clubes = new ArrayList<>();
-        this.confederacao = new Partidas.Confederacao("CBF", "Brasil", 1914, "Ednaldo Rodrigues");
+        this.confederacao = new Campeonato.Confederacao("CBF", "Brasil", 1914, "Ednaldo Rodrigues");
         inicializarDados();
     }
     
@@ -62,7 +59,7 @@ public class ServidorClube {
         confederacao.adicionarClube(serieB);
         
         String[] paises = {"Brasil", "Argentina", "Uruguai", "Paraguai", "Chile", "Colômbia", "Equador", "Venezuela", "Bolívia", "Peru"};
-        SerieA.Libertadores libertadores = new SerieA.Libertadores("Copa model.SerieA.Libertadores", "Assunção", 1960,
+        Libertadores libertadores = new Libertadores("Copa model.SerieA.Libertadores", "Assunção", 1960,
                                                    "Diversos", 64, 2023, 32, paises, "Fluminense", 
                                                    "Boca Juniors", "Final");
         clubes.add(libertadores);

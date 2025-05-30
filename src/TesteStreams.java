@@ -2,6 +2,8 @@ import model.Clube;
 import model.SerieA;
 import model.SerieB;
 import model.SocioTorcedor;
+import streams.ClubeInputStream;
+import streams.ClubeOutputStream;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
