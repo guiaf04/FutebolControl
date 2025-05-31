@@ -1,72 +1,135 @@
-import model.Clube;
-import model.SerieB;
+import Utils.Desempacotamento;
+import model.Clube; // Importe sua classe Clube
+import streams.ClubeInputStream; // Importe seu stream customizado
+import Utils.Empacotamento; // Importe sua classe de serialização
 
-import java.io.Serializable;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
-/**
- * Classe para testar a serialização e os streams personalizados
- */
-public class TesteStreams implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class TesteStreams {
+
     public static void main(String[] args) {
-        //try {
-//            // Cria alguns clubes para teste
-//            Clube[] clubes = criarClubesTeste();
-//
-//            // Define o número de bytes para cada clube (simplificado para o exemplo)
-//            int[] numBytes = {100, 100, 100, 100};
-//
-//            // Teste com saída padrão (System.out)
-//            System.out.println("=== Teste com System.out ===");
-//            ClubeOutputStream outStream1 = new ClubeOutputStream(clubes, clubes.length, numBytes, System.out);
-//            outStream1.enviarDados();
-//
-//            // Teste com arquivo
-//            System.out.println("\n=== Teste com FileOutputStream ===");
-//            FileOutputStream fileOut = new FileOutputStream("clubes.dat");
-//            ClubeOutputStream outStream2 = new ClubeOutputStream(clubes, clubes.length, numBytes, fileOut);
-//            outStream2.enviarDados();
-//            outStream2.close();
-//
-//            // Teste de leitura do arquivo
-//            System.out.println("\n=== Teste com FileInputStream ===");
-//            FileInputStream fileIn = new FileInputStream("clubes.dat");
-//            ClubeInputStream inStream = new ClubeInputStream(fileIn);
-//            Clube[] clubesLidos = inStream.readSystem();
-//            inStream.close();
-//
-//            // Exibe os clubes lidos
-//            for (Clube clube : clubesLidos) {
-//                System.out.println(clube.exibirInformacoes());
-//                System.out.println("----------------------------");
-//            }
-            
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-    }
-    
-    /**
-     * Método auxiliar para criar clubes de teste
-     * @return Array de clubes para teste
-     */
-    private static Clube[] criarClubesTeste() {
-        Clube[] clubes = new Clube[4];
-        
-        // model.Clube genérico
-        clubes[0] = new Clube("Flamengo", "Rio de Janeiro", 1895, "Maracanã", 45);
-        
-        // model.SerieA
-        
-        // model.SerieB
-        String[] promovidos = {"Vitória", "Juventude", "Criciúma", "Atlético-GO"};
-        String[] rebaixados = {"Londrina", "Tombense", "Chapecoense", "ABC"};
-        SerieB serieB = new SerieB("Campeonato Brasileiro Série B", "Rio de Janeiro", 1971,
-                                  "Diversos", 51, 2023, 20, promovidos, rebaixados, 38);
-        
+        System.out.println("=========================================");
+        System.out.println("     INICIANDO BATERIA DE TESTES");
+        System.out.println("=========================================\n");
 
-        
-        return clubes;
+        // Executa o primeiro teste (este não precisa de alteração)
+        testeLeituraDeEntradaSimulada();
+
+        System.out.println("\n-----------------------------------------\n");
+
+        // Executa o segundo teste (este foi alterado)
+        testePersistenciaEmArquivo();
+
+        System.out.println("\n=========================================");
+        System.out.println("      FIM DA BATERIA DE TESTES");
+        System.out.println("=========================================");
+    }
+
+    /**
+     * TESTE 1: Simula a entrada de dados pelo console para testar o
+     * ClubeInputStream.readSystem().
+     * (Este método permanece inalterado)
+     */
+    private static void testeLeituraDeEntradaSimulada() {
+        System.out.println("--- INICIANDO TESTE 1: Leitura de Entrada do Sistema ---");
+        try {
+            // 1. PREPARAÇÃO: Simula a entrada do usuário
+            String entradaSimulada = "2\nFlamengo\nRio de Janeiro\nPalmeiras\nSão Paulo\n";
+            InputStream inputStreamSimulado = new ByteArrayInputStream(entradaSimulada.getBytes());
+            ClubeInputStream leitor = new ClubeInputStream(inputStreamSimulado);
+
+            // 2. AÇÃO: Executa o método a ser testado
+            System.out.println("Ação: Chamando o método readSystem() com dados simulados...");
+            ArrayList<Clube> clubesLidos = leitor.readSystem();
+
+            // 3. VERIFICAÇÃO: Checa se os resultados estão corretos
+            boolean sucesso = true;
+            if (clubesLidos == null || clubesLidos.size() != 2) {
+                System.out.println(">>> FALHA: A lista deveria ter 2 clubes, mas tem " + (clubesLidos != null ? clubesLidos.size() : 0));
+                sucesso = false;
+            } else if (!"Flamengo".equals(clubesLidos.get(0).getNome())) {
+                System.out.println(">>> FALHA: O nome do primeiro clube está incorreto.");
+                sucesso = false;
+            } else if (!"São Paulo".equals(clubesLidos.get(1).getCidade())) {
+                System.out.println(">>> FALHA: A cidade do segundo clube está incorreta.");
+                sucesso = false;
+            }
+
+            if (sucesso) {
+                System.out.println(">>> SUCESSO: O método readSystem() processou a entrada simulada corretamente!");
+            }
+
+        } catch (IOException e) {
+            System.out.println(">>> FALHA: Ocorreu uma exceção inesperada durante o teste.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * TESTE 2: Testa o ciclo de serialização e desserialização para um arquivo.
+     * ATUALIZADO para usar o método Empacotamento.gravarArquivoBinario().
+     */
+    private static void testePersistenciaEmArquivo() {
+        System.out.println("--- INICIANDO TESTE 2: Persistência de Dados em Arquivo ---");
+
+        String nomeArquivo = "clubes_teste.dat";
+        Path caminhoDoArquivo = Paths.get(nomeArquivo);
+
+        try {
+            // 1. PREPARAÇÃO: Cria uma lista de objetos
+            ArrayList<Clube> listaOriginal = new ArrayList<>();
+            listaOriginal.add(new Clube("Grêmio", "Porto Alegre"));
+            listaOriginal.add(new Clube("Internacional", "Porto Alegre"));
+            System.out.println("Ação: Preparando para salvar " + listaOriginal.size() + " clubes no arquivo '" + nomeArquivo + "'...");
+
+            // 2. AÇÃO (Escrita): Chama diretamente o método refatorado.
+            // A lógica de serializar e gravar está agora encapsulada neste método.
+            Empacotamento.gravarArquivoBinario(listaOriginal, nomeArquivo);
+
+            if (!Files.exists(caminhoDoArquivo)) {
+                System.out.println(">>> FALHA: O arquivo não foi criado no disco.");
+                return;
+            }
+            System.out.println("Ação: Arquivo salvo com sucesso. Lendo os dados de volta...");
+
+            // 3. AÇÃO (Leitura): Lê do arquivo e desserializa
+            byte[] bytesLidosDoArquivo = Files.readAllBytes(caminhoDoArquivo);
+            ArrayList<Clube> listaLidaDoArquivo = Desempacotamento.lerArrayDeBytes(bytesLidosDoArquivo);
+
+            // 4. VERIFICAÇÃO (Permanece a mesma)
+            boolean sucesso = true;
+            if (listaLidaDoArquivo == null || listaLidaDoArquivo.size() != listaOriginal.size()) {
+                System.out.println(">>> FALHA: O tamanho da lista lida (" + (listaLidaDoArquivo != null ? listaLidaDoArquivo.size() : 0) + ") é diferente da original ("+ listaOriginal.size() +").");
+                sucesso = false;
+            } else if (!listaOriginal.get(0).getNome().equals(listaLidaDoArquivo.get(0).getNome())) {
+                System.out.println(">>> FALHA: O conteúdo da lista lida não corresponde ao original.");
+                sucesso = false;
+            }
+
+            if (sucesso) {
+                System.out.println(">>> SUCESSO: A lista de clubes foi salva e lida do arquivo com sucesso!");
+            }
+
+        } catch (IOException e) {
+            // O catch agora pode capturar exceções tanto de gravarArquivoBinario() quanto de Files.readAllBytes()
+            System.out.println(">>> FALHA: Ocorreu uma exceção de I/O durante o teste de arquivo.");
+            e.printStackTrace();
+        } finally {
+            // LIMPEZA: Continua sendo essencial
+            try {
+                if (Files.exists(caminhoDoArquivo)) {
+                    Files.delete(caminhoDoArquivo);
+                    System.out.println("Limpeza: Arquivo de teste '" + nomeArquivo + "' removido.");
+                }
+            } catch (IOException e) {
+                System.err.println("Erro ao deletar o arquivo de teste: " + e.getMessage());
+            }
+        }
     }
 }

@@ -26,6 +26,15 @@ public class Clube implements Serializable {
         this.estatisticas = new ArrayList<>();
     }
 
+    public Clube(String nome, String cidade) {
+        this.nome = nome;
+        this.cidade = cidade;
+        this.anoFundacao = 0; // Valor padrão
+        this.estadio = ""; // Valor padrão
+        this.numeroTitulos = 0; // Valor padrão
+        this.estatisticas = new ArrayList<>();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
