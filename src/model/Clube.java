@@ -1,6 +1,8 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class Clube implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -10,6 +12,7 @@ public class Clube implements Serializable {
     private int anoFundacao;
     private String estadio;
     private int numeroTitulos;
+    private ArrayList<EstatisticasClube> estatisticas;
 
     public Clube() {
     }
@@ -20,9 +23,30 @@ public class Clube implements Serializable {
         this.anoFundacao = anoFundacao;
         this.estadio = estadio;
         this.numeroTitulos = numeroTitulos;
+        this.estatisticas = new ArrayList<>();
     }
-    
-    // Getters e Setters
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Clube clube = (Clube) o;
+        return Objects.equals(nome, clube.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(nome);
+    }
+
+    public ArrayList<EstatisticasClube> getEstatisticas() {
+        return estatisticas;
+    }
+
+    public void setEstatisticas(ArrayList<EstatisticasClube> estatisticas) {
+        this.estatisticas = estatisticas;
+    }
+
     public String getNome() {
         return nome;
     }

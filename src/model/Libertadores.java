@@ -1,12 +1,14 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Classe model.SerieA.Libertadores - Subclasse que representa o campeonato da model.SerieA.Libertadores
  * Estende a classe model.Clube e implementa Serializable para permitir a serialização
  */
-public class Libertadores  implements Serializable {
+public class Libertadores  implements Serializable, Campeonato {
   private static final long serialVersionUID = 1L;
 
   private int ano;
@@ -15,6 +17,7 @@ public class Libertadores  implements Serializable {
   private String campeao;
   private String viceCampeao;
   private String faseAtual;
+  private Map<Clube, EstatisticasClube> estatisticasClubes;
 
   /**
    * Construtor padrão
@@ -23,24 +26,7 @@ public class Libertadores  implements Serializable {
     this.paisesParticipantes = new String[10];
   }
 
-  /**
-   * Construtor com parâmetros
-   *
-   * @param nome                Nome do campeonato
-   * @param cidade              Cidade sede da organização
-   * @param anoFundacao         Ano de fundação do campeonato
-   * @param estadio             Estádio da final
-   * @param numeroTitulos       Número de edições
-   * @param ano                 Ano da edição atual
-   * @param numeroEquipes       Número de equipes participantes
-   * @param paisesParticipantes Países com equipes participantes
-   * @param campeao             Último campeão
-   * @param viceCampeao         Último vice-campeão
-   * @param faseAtual           Fase atual do campeonato
-   */
-  public Libertadores(String nome, String cidade, int anoFundacao, String estadio, int numeroTitulos,
-                      int ano, int numeroEquipes, String[] paisesParticipantes, String campeao,
-                      String viceCampeao, String faseAtual) {
+  public Libertadores(int ano, int numeroEquipes, String campeao, String viceCampeao, String faseAtual) {
     this.ano = ano;
     this.numeroEquipes = numeroEquipes;
     this.paisesParticipantes = paisesParticipantes;
@@ -50,6 +36,10 @@ public class Libertadores  implements Serializable {
   }
 
   // Getters e Setters
+  public void setEstatisticasClubes(Map<Clube, EstatisticasClube> estatisticasClubes) {
+    this.estatisticasClubes = estatisticasClubes;
+  }
+
   public int getAno() {
     return ano;
   }
@@ -135,8 +125,24 @@ public class Libertadores  implements Serializable {
     return true;
   }
 
+  @Override
+  public int registrarPartida(Partida partida) {
+    return 0;
+  }
+
   public String obterInformacoesPartida(int idPartida) {
     // Implementação da obtenção de informações de partida para model.SerieA.Libertadores
     return "Informações da partida " + idPartida + " do campeonato model.SerieA.Libertadores";
+  }
+
+  @Override
+  public ArrayList<EstatisticasClube> getEstatisticasPorClube(Clube clube) {
+    ArrayList<EstatisticasClube> estatisticas = new ArrayList<>();
+    for (Map.Entry<Clube, EstatisticasClube> entry : estatisticasClubes.entrySet()) {
+      if (entry.getKey().equals(clube)) {
+        estatisticas.add(entry.getValue());
+      }
+    }
+    return estatisticas;
   }
 }

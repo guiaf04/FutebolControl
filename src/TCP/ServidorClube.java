@@ -1,22 +1,23 @@
 package TCP;
 
 import Utils.Desempacotamento;
+import Utils.Empacotamento;
 import model.*;
+import service.ClubeService;
 import streams.ClubeInputStream;
+import streams.ClubeOutputStream;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Classe TCP.ServidorClube - Implementa um servidor para o sistema de clubes
- * Recebe conexões de clientes e processa requisições
- */
 public class ServidorClube {
     private static final int PORTA = 12345;
     private List<Clube> clubes;
+    private ArrayList<Campeonato> campeonatos = new ArrayList<>();
 
     public ServidorClube() {
         this.clubes = new ArrayList<>();
@@ -35,6 +36,24 @@ public class ServidorClube {
         clubes.add(flamengo);
         clubes.add(palmeiras);
         clubes.add(gremio);
+
+        SerieA campeonatoBrasileiro = new SerieA(2023, 20, "Flamengo", "Palmeiras", 10);
+        Map<Clube, EstatisticasClube> estatisticas = Map.of(
+            flamengo, new EstatisticasClube(10, 5, 3, "Brasileirão"),
+            palmeiras, new EstatisticasClube(10, 6, 2, "Brasileirão"),
+            gremio, new EstatisticasClube(10, 4, 4, "Brasileirão")
+        );
+        campeonatoBrasileiro.setEstatisticasClubes(estatisticas);
+
+        Libertadores libertadores = new Libertadores(2023, 32, "Flamengo", "Palmeiras", "6");
+        Map<Clube, EstatisticasClube> estatisticasLibertadores = Map.of(
+            flamengo, new EstatisticasClube(6, 3, 2, "Libertadores"),
+            palmeiras, new EstatisticasClube(6, 4, 1, "Libertadores")
+        );
+        libertadores.setEstatisticasClubes(estatisticasLibertadores);
+
+        campeonatos.add(campeonatoBrasileiro);
+        campeonatos.add(libertadores);
     }
 
     public static void main(String args[]) {
@@ -42,51 +61,57 @@ public class ServidorClube {
             System.out.println("Servidor iniciado");
             int serverPort = 7896; // the server port
             ServerSocket listenSocket = new ServerSocket(serverPort);
+            ServidorClube servidorClube = new ServidorClube();
             while (true) {
                 Socket clientSocket = listenSocket.accept();
                 System.out.println(clientSocket.getInetAddress());
                 System.out.println("conexão estabelecida");
-                Connection c = new Connection(clientSocket);
+                Connection c = new Connection(clientSocket, servidorClube);
             }
         } catch (IOException e) {
             System.out.println("Listen socket:" + e.getMessage());
         }
     }
 
+    public ArrayList<Campeonato> getCampeonatos() {
+        return campeonatos;
+    }
+
+    public void setCampeonatos(ArrayList<Campeonato> campeonatos) {
+        this.campeonatos = campeonatos;
+    }
 }
 
 class Connection extends Thread {
     ClubeInputStream in;
-    DataOutputStream out;
+    ClubeOutputStream out;
     Socket clientSocket;
+    private ServidorClube servidor;
 
-    public Connection(Socket aClientSocket) {
-        try {
-            clientSocket = aClientSocket;
-            in = new ClubeInputStream(clientSocket.getInputStream());
-            out = new DataOutputStream(clientSocket.getOutputStream());
-            this.start();
-        } catch (IOException e) {
-            System.out.println("Connection:" + e.getMessage());
-        }
+    public Connection(Socket aClientSocket, ServidorClube servidor) {
+        this.clientSocket = aClientSocket;
+        this.servidor = servidor;
+        this.start();
     }
+
 
     public void run() {
         try {
-            ArrayList<Object> listaDeClubes = in.readTcp();
+            // RECEBER USANDO O STREAM CORRIGIDO
+            ClubeInputStream in = new ClubeInputStream(clientSocket.getInputStream());
+            ArrayList<Clube> listaDeClubes = in.readTcp();
             System.out.println("Servidor: " + listaDeClubes.size() + " clubes recebidos com sucesso.");
 
-            if (!listaDeClubes.isEmpty() && listaDeClubes.getFirst() instanceof Clube primeiroCliente) {
-                listaDeClubes.forEach(clube -> {
-                    if (clube instanceof Clube c) {
-                        System.out.println("Nome do clube: " + c.getNome());
-                        System.out.println("Cidade do clube: " + c.getCidade());
-                    }
-                });
-            }
+            // Processar
+            ArrayList<Clube> clubesComEstatisticas = ClubeService.enviaClubesComEstatisticas(
+                    listaDeClubes,
+                    servidor.getCampeonatos()
+            );
 
-            String resposta = "Servidor processou " + listaDeClubes.size() + " objetos.";
-            out.writeUTF(resposta.toUpperCase());
+            // ENVIAR RESPOSTA USANDO O STREAM CORRIGIDO
+            byte[] conteudoResposta = Empacotamento.serializarParaBytes(clubesComEstatisticas);
+            ClubeOutputStream out = new ClubeOutputStream(clientSocket.getOutputStream());
+            out.enviarDados(conteudoResposta);
 
         } catch (IOException e) {
             System.out.println("Erro na conexão: " + e.getMessage());

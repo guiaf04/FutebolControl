@@ -16,28 +16,23 @@ public class ClienteClube {
         try {
             int serverPort = 7896;
             s = new Socket("localhost", serverPort);
-            DataInputStream in = new DataInputStream(s.getInputStream());
-            ClubeInputStream clubeInputStream = new ClubeInputStream(System.in);
 
-            ArrayList<Object> clubes = clubeInputStream.readSystem();
+            ClubeInputStream clubeInputStream = new ClubeInputStream(System.in);
+            ArrayList<Clube> clubes = clubeInputStream.readSystem();
             byte[] conteudo = Empacotamento.serializarParaBytes(clubes);
 
-            ClubeOutputStream out = new ClubeOutputStream(
-                    clubes,
-                    clubes.size(),
-                    s.getOutputStream());
+            ClubeOutputStream out = new ClubeOutputStream(s.getOutputStream());
+            out.enviarDados(conteudo);
 
-            // Serializa os objetos e grava no arquivo binário
+            System.out.println("CLIENTE: Aguardando resposta do servidor...");
+            ClubeInputStream in = new ClubeInputStream(s.getInputStream());
+            ArrayList<Clube> clubesComEstatisticas = in.readTcp();
 
-            System.out.println("Enviando " + conteudo.length + " bytes de dados.");
-            out.write(conteudo.length);
+            System.out.println("CLIENTE: Resposta recebida! Clubes com estatísticas:");
+            clubesComEstatisticas.forEach(clube -> {
+                System.out.println(" - " + clube.getNome() + " | " + clube.getEstatisticas());
+            });
 
-            // 2. Enviar o ARRAY de bytes em si.
-            out.write(conteudo);
-            out.flush(); // Garante que todos os dados foram enviados da buffer
-
-            String data = in.readUTF(); // read a line of data from the stream
-            System.out.println("Received: " + data);
         } catch (UnknownHostException e) {
             System.out.println("Socket:" + e.getMessage());
         } catch (EOFException e) {

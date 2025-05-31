@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class SerieA implements Serializable, Campeonato {
@@ -23,6 +24,11 @@ public class SerieA implements Serializable, Campeonato {
         this.campeao = campeao;
         this.viceCampeao = viceCampeao;
         this.rodadaAtual = rodadaAtual;
+        this.estatisticasClubes = new java.util.HashMap<>();
+    }
+
+    public void setEstatisticasClubes(Map<Clube, EstatisticasClube> estatisticasClubes) {
+        this.estatisticasClubes = estatisticasClubes;
     }
 
     public int getAno() {
@@ -86,6 +92,17 @@ public class SerieA implements Serializable, Campeonato {
     public String obterInformacoesPartida(int idPartida) {
         // Implementação da obtenção de informações de partida para Série A
         return "Informações da partida " + idPartida + " do campeonato Série A";
+    }
+
+    @Override
+    public ArrayList<EstatisticasClube> getEstatisticasPorClube(Clube clube) {
+        ArrayList<EstatisticasClube> estatisticas = new ArrayList<>();
+        for (Map.Entry<Clube, EstatisticasClube> entry : estatisticasClubes.entrySet()) {
+            if (entry.getKey().equals(clube)) {
+                estatisticas.add(entry.getValue());
+            }
+        }
+        return estatisticas;
     }
 
 }

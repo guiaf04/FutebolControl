@@ -1,13 +1,6 @@
 import model.Clube;
-import model.SerieA;
 import model.SerieB;
-import model.SocioTorcedor;
-import streams.ClubeInputStream;
-import streams.ClubeOutputStream;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -72,11 +65,7 @@ public class TesteStreams implements Serializable {
         SerieB serieB = new SerieB("Campeonato Brasileiro Série B", "Rio de Janeiro", 1971,
                                   "Diversos", 51, 2023, 20, promovidos, rebaixados, 38);
         
-        // model.SocioTorcedor
-        SocioTorcedor socio = new SocioTorcedor("Flamengo", "Rio de Janeiro", 1895, "Maracanã",
-                                               45, "João Silva", "123.456.789-00", "Plano Diamante", 
-                                               199.90, "01/01/2023", true);
-        clubes[3] = socio;
+
         
         return clubes;
     }

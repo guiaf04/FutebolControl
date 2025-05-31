@@ -16,7 +16,7 @@ public class ClubeInputStream extends InputStream implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private InputStream inputStream;
-    private ArrayList<Object> clubes;
+    private ArrayList<Clube> clubes;
     private int numClubes;
 
 
@@ -30,11 +30,12 @@ public class ClubeInputStream extends InputStream implements Serializable {
         return inputStream.read();
     }
 
-    public ArrayList<Object> readSystem() throws IOException {
+    public ArrayList<Clube> readSystem() throws IOException {
         Scanner sc = new Scanner(inputStream);
 
         System.out.println("Informa o número de clubes:");
         numClubes = sc.nextInt();
+        sc.nextLine(); // Consumir a nova linha após o número
 
         // Para cada clube
         for (int i = 0; i < numClubes; i++) {
@@ -54,23 +55,22 @@ public class ClubeInputStream extends InputStream implements Serializable {
         return clubes;
     }
 
-    public ArrayList<Object> readTcp() throws IOException {
-        int length = inputStream.read();
+    public ArrayList<Clube> readTcp() throws IOException {
+        DataInputStream dis = new DataInputStream(this.inputStream);
+
+        int length = dis.readInt();
         System.out.println("Servidor: Recebendo " + length + " bytes...");
 
         if (length > 0) {
-            // 2. Ler EXATAMENTE essa quantidade de bytes
             byte[] dadosRecebidos = new byte[length];
-            inputStream.readNBytes(dadosRecebidos, 0, dadosRecebidos.length);
+            dis.readFully(dadosRecebidos);
 
-            // 3. USAR O NOVO MÉTODO para desempacotar os bytes em objetos
             System.out.println("Servidor: Desempacotando os objetos...");
             return Desempacotamento.lerArrayDeBytes(dadosRecebidos);
         }
-        return null;
+        return new ArrayList<>();
     }
-
-    @Override
+        @Override
     public void close() throws IOException {
         inputStream.close();
         super.close();

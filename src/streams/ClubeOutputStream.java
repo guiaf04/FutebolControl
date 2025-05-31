@@ -1,23 +1,26 @@
 package streams;
 
 import model.*;
+import service.ClubeService;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ClubeOutputStream extends OutputStream implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    private ArrayList<Object> clubes;
+    private ArrayList<Clube> clubes;
     private int numClubes;
     private int[] numBytes;
     private OutputStream outputStream;
     private int currentClube;
     private int currentByte;
 
-    public ClubeOutputStream(ArrayList<Object> clubes, int numClubes, OutputStream outputStream) {
+    public ClubeOutputStream(ArrayList<Clube> clubes, int numClubes, OutputStream outputStream) {
         this.clubes = clubes;
         this.numClubes = numClubes;
         this.numBytes = new int[100];
@@ -26,35 +29,29 @@ public class ClubeOutputStream extends OutputStream implements Serializable {
         this.currentByte = 0;
     }
 
+    public ClubeOutputStream(OutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
+
+    public void setClubes(ArrayList<Clube> clubes) {
+        this.clubes = clubes;
+    }
+
     @Override
     public void write(int b) throws IOException {
         outputStream.write(b);
     }
 
-    public void enviarDados() throws IOException {
-        // Escreve o número de clubes
-        outputStream.write(numClubes);
-        
-        // Para cada clube
-        for (int i = 0; i < numClubes; i++) {
-            Clube clube = (Clube) clubes.get(i);
-            
-            // Escreve o nome do clube
-            byte[] nomeBytes = clube.getNome().getBytes();
-            outputStream.write(nomeBytes.length);
-            outputStream.write(nomeBytes);
-            
-            // Escreve a cidade do clube
-            byte[] cidadeBytes = clube.getCidade().getBytes();
-            outputStream.write(cidadeBytes.length);
-            outputStream.write(cidadeBytes);
-            
-            // Escreve o ano de fundação
-            outputStream.write(clube.getAnoFundacao());
-        }
-        
-        // Flush para garantir que todos os dados foram enviados
-        outputStream.flush();
+    public void enviarDados(byte[] conteudo) throws IOException {
+        DataOutputStream dos = new DataOutputStream(this.outputStream);
+
+        System.out.println("Enviando " + conteudo.length + " bytes de dados.");
+
+        dos.writeInt(conteudo.length);
+
+        dos.write(conteudo);
+
+        dos.flush();
     }
 
     @Override

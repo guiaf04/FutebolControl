@@ -8,21 +8,13 @@ import java.util.ArrayList;
 
 public class Empacotamento {
 
-	/**
-	 * NOVO MÉTODO (RECOMENDADO): Serializa uma lista de objetos diretamente para um array de bytes em memória.
-	 * Perfeito para enviar dados pela rede.
-	 * @param lista A lista de objetos a ser serializada.
-	 * @return Um array de bytes contendo os dados do objeto serializado.
-	 */
-	public static byte[] serializarParaBytes(ArrayList<Object> lista) {
+	public static <T> byte[] serializarParaBytes(ArrayList<T> lista) {
 		// Usa um ByteArrayOutputStream para escrever os dados do objeto em memória
 		try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 				 ObjectOutputStream objOutput = new ObjectOutputStream(byteStream)) {
 
-			// Escreve o objeto no stream de bytes
 			objOutput.writeObject(lista);
 
-			// Retorna o conteúdo do stream como um array de bytes pronto para ser enviado
 			return byteStream.toByteArray();
 
 		} catch (IOException e) {
@@ -33,11 +25,6 @@ public class Empacotamento {
 		}
 	}
 
-	/**
-	 * MÉTODO ANTIGO (NÃO RECOMENDADO PARA REDE): Serializa e grava os objetos em um arquivo binário.
-	 * @param lista Lista de objetos a serem gravados.
-	 * @param nomeArq Nome do arquivo a ser criado no disco.
-	 */
 	public static void gravarArquivoBinario(ArrayList<Object> lista, String nomeArq) {
 		// Este método apenas grava em disco, não retorna os bytes.
 		try (FileOutputStream arq = new FileOutputStream(nomeArq);

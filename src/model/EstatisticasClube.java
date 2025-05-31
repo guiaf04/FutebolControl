@@ -1,14 +1,28 @@
 package model;
 
-public class EstatisticasClube {
+import java.io.Serializable;
+
+public class EstatisticasClube implements Serializable {
     private int vitorias;
     private int empates;
     private int derrotas;
+    private String campeonato;
 
-    public EstatisticasClube() {
-        this.vitorias = 0;
-        this.empates = 0;
-        this.derrotas = 0;
+    @Override
+    public String toString() {
+        return "EstatisticasClube{" +
+                "vitorias=" + vitorias +
+                ", empates=" + empates +
+                ", derrotas=" + derrotas +
+                ", campeonato='" + campeonato + '\'' +
+                '}';
+    }
+
+    public EstatisticasClube(int vitorias, int empates, int derrotas, String campeonato) {
+        this.vitorias = vitorias;
+        this.empates = empates;
+        this.derrotas = derrotas;
+        this.campeonato = campeonato;
     }
 
     public int getVitorias() {
