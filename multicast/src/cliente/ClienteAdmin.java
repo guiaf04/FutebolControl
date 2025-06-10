@@ -25,7 +25,10 @@ public class ClienteAdmin {
 
             System.out.println("--- PAINEL DE ADMINISTRAÇÃO ---");
 
-            if (!realizarLogin(scanner, in, out)) {
+            // A chamada para realizarLogin agora será feita dentro de um loop
+            String tipoUsuario = realizarLogin(scanner, in, out);
+            if (tipoUsuario == null || !"ADMIN".equals(tipoUsuario)) { // Se não logar como admin ou sair
+                System.out.println("Encerrando o cliente.");
                 return;
             }
             
@@ -36,26 +39,44 @@ public class ClienteAdmin {
         }
     }
 
-    private static boolean realizarLogin(Scanner scanner, DataInputStream in, DataOutputStream out) throws IOException {
-        System.out.print("Login (admin): ");
-        String login = scanner.nextLine();
-        System.out.print("Senha (admin): ");
-        String senha = scanner.nextLine();
+    // O método realizarLogin agora retorna o tipo de usuário ou null
+    private static String realizarLogin(Scanner scanner, DataInputStream in, DataOutputStream out) throws IOException {
+        String login;
+        String senha;
+        Mensagem response;
+        String tipoUsuarioLogado = null; // Para armazenar o tipo de usuário logado
 
-        Mensagem loginRequest = new Mensagem("LOGIN", Map.of("login", login, "senha", senha));
-        out.writeUTF(gson.toJson(loginRequest));
+        while (true) {
+            System.out.print("Login (admin, digite 'sair' para encerrar): ");
+            login = scanner.nextLine();
+            if (login.equalsIgnoreCase("sair")) {
+                return null; // O usuário decidiu sair
+            }
 
-        Mensagem response = gson.fromJson(in.readUTF(), Mensagem.class);
+            System.out.print("Senha (admin): ");
+            senha = scanner.nextLine();
 
-        if ("LOGIN_SUCESSO".equals(response.getTipo()) && "ADMIN".equals(response.getPayload().get("tipo_usuario"))) {
-            System.out.println("Login de administrador realizado com sucesso!\n");
-            return true;
-        } else {
-            System.err.println("Falha no login ou usuário não é admin.");
-            return false;
+            Mensagem loginRequest = new Mensagem("LOGIN", Map.of("login", login, "senha", senha));
+            out.writeUTF(gson.toJson(loginRequest));
+
+            response = gson.fromJson(in.readUTF(), Mensagem.class);
+
+            if ("LOGIN_SUCESSO".equals(response.getTipo())) {
+                tipoUsuarioLogado = (String) response.getPayload().get("tipo_usuario");
+                if ("ADMIN".equals(tipoUsuarioLogado)) {
+                    System.out.println("Login de administrador realizado com sucesso!\n");
+                    return tipoUsuarioLogado; // Retorna o tipo de usuário logado (ADMIN)
+                } else {
+                    System.err.println("Login bem-sucedido, mas o usuário não é um administrador. Tente novamente com um login de admin.");
+                }
+            } else {
+                System.err.println("Falha no login: " + response.getPayload().get("mensagem") + ". Tente novamente.");
+            }
         }
     }
     
+    // ... (o restante do código de ClienteAdmin.java permanece o mesmo)
+    // menuAdmin, addCandidato, removeCandidato, enviarNota
     private static void menuAdmin(Scanner scanner, DataInputStream in, DataOutputStream out) throws IOException {
         while (true) {
             System.out.println("\nOpções de Administrador:");

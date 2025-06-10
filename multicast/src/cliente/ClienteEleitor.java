@@ -31,10 +31,14 @@ public class ClienteEleitor {
             System.out.println("--- BEM-VINDO AO SISTEMA DE VOTAÇÃO ---");
 
             // 1. Login
-            if (!realizarLogin(scanner, in, out)) {
-                return; // Encerra se o login falhar
+            // A chamada para realizarLogin agora será feita dentro de um loop
+            String tipoUsuario = realizarLogin(scanner, in, out);
+            if (tipoUsuario == null) { // Retorna null se o usuário quiser sair
+                System.out.println("Encerrando o cliente.");
+                return; 
             }
-            
+            // Se o login for bem-sucedido, tipoUsuario será "ELEITOR"
+
             // 2. Loop principal
             menuVotacao(scanner, in, out);
 
@@ -43,24 +47,36 @@ public class ClienteEleitor {
         }
     }
 
-    private static boolean realizarLogin(Scanner scanner, DataInputStream in, DataOutputStream out) throws IOException {
-        System.out.print("Login: ");
-        String login = scanner.nextLine();
-        System.out.print("Senha: ");
-        String senha = scanner.nextLine();
+    // O método realizarLogin agora retorna o tipo de usuário ou null
+    private static String realizarLogin(Scanner scanner, DataInputStream in, DataOutputStream out) throws IOException {
+        String login;
+        String senha;
+        Mensagem response;
+        String tipoUsuarioLogado = null; // Para armazenar o tipo de usuário logado
 
-        Mensagem loginRequest = new Mensagem("LOGIN", Map.of("login", login, "senha", senha));
-        out.writeUTF(gson.toJson(loginRequest));
+        while (true) {
+            System.out.print("Login (digite 'sair' para encerrar): ");
+            login = scanner.nextLine();
+            if (login.equalsIgnoreCase("sair")) {
+                return null; // O usuário decidiu sair
+            }
 
-        String jsonResponse = in.readUTF();
-        Mensagem response = gson.fromJson(jsonResponse, Mensagem.class);
+            System.out.print("Senha: ");
+            senha = scanner.nextLine();
 
-        if ("LOGIN_SUCESSO".equals(response.getTipo())) {
-            System.out.println("Login realizado com sucesso!\n");
-            return true;
-        } else {
-            System.err.println("Falha no login: " + response.getPayload().get("mensagem"));
-            return false;
+            Mensagem loginRequest = new Mensagem("LOGIN", Map.of("login", login, "senha", senha));
+            out.writeUTF(gson.toJson(loginRequest));
+
+            String jsonResponse = in.readUTF();
+            response = gson.fromJson(jsonResponse, Mensagem.class);
+
+            if ("LOGIN_SUCESSO".equals(response.getTipo())) {
+                tipoUsuarioLogado = (String) response.getPayload().get("tipo_usuario");
+                System.out.println("Login realizado com sucesso como " + tipoUsuarioLogado + "!\n");
+                return tipoUsuarioLogado; // Retorna o tipo de usuário logado
+            } else {
+                System.err.println("Falha no login: " + response.getPayload().get("mensagem") + ". Tente novamente.");
+            }
         }
     }
     
