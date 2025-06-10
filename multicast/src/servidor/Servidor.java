@@ -35,7 +35,8 @@ public class Servidor {
 
     public Servidor() {
         carregarDadosIniciais();
-        iniciarTimerVotacao();
+        // Inicia a primeira votação quando o servidor liga
+        startNewVotingPeriod(); 
     }
 
     private void carregarDadosIniciais() {
@@ -49,27 +50,53 @@ public class Servidor {
         adicionarCandidato(new Candidato(2, "Maria Santos", "Partido do Futuro"));
     }
     
+    // Este método é chamado para adicionar um candidato
     public void adicionarCandidato(Candidato c) {
         candidatos.put(c.getId(), c);
-        votos.putIfAbsent(c.getId(), new AtomicInteger(0));
+        votos.putIfAbsent(c.getId(), new AtomicInteger(0)); // Garante que o candidato tenha uma contagem de votos
     }
 
-    private void iniciarTimerVotacao() {
+    // NOVO/MODIFICADO: Inicia ou reinicia um período de votação
+    private void startNewVotingPeriod() {
+        this.votacaoAberta = true;
+        this.eleitoresQueVotaram.clear(); // Limpa a lista de eleitores que já votaram na sessão anterior
+        
+        // Zera a contagem de votos para todos os candidatos existentes
+        candidatos.forEach((id, candidato) -> votos.put(id, new AtomicInteger(0))); // Recria ou zera o AtomicInteger
+
         this.fimVotacao = LocalDateTime.now().plusMinutes(DURACAO_VOTACAO_MINUTOS);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        System.out.println("✅ Servidor iniciado. A votação se encerrará às " + fimVotacao.format(formatter));
+        System.out.println("✅ Votação iniciada/reiniciada. O encerramento será às " + fimVotacao.format(formatter));
 
         Thread timerThread = new Thread(() -> {
             try {
                 Thread.sleep(DURACAO_VOTACAO_MINUTOS * 60 * 1000);
-                encerrarVotacao();
+                if (votacaoAberta) { // Apenas encerra se não foi encerrada manualmente por admin
+                    encerrarVotacao();
+                }
             } catch (InterruptedException e) {
                 System.err.println("Timer da votação interrompido.");
+                Thread.currentThread().interrupt(); // Restaura o status de interrupção
             }
         });
+        timerThread.setDaemon(true); // Permite que a JVM termine se apenas threads daemon estiverem ativas
         timerThread.start();
     }
 
+    // NOVO: Método que o Admin chamará para iniciar uma nova votação
+    public synchronized void iniciarNovaVotacaoAdmin() {
+        if (votacaoAberta) {
+            System.out.println("❌ Votação já está aberta. Não é possível iniciar uma nova.");
+            enviarNotaMulticast("ERRO ADMIN: Uma votação já está em andamento. Não é possível iniciar outra.");
+            return;
+        }
+        System.out.println("\n-------------------------------------------");
+        System.out.println("✅ ADMIN INICIOU UMA NOVA VOTAÇÃO! ✅");
+        startNewVotingPeriod(); // Reinicia o período de votação
+        enviarNotaMulticast("ATENÇÃO: Uma nova votação foi iniciada! Você já pode votar novamente.");
+    }
+
+    // Método encerrarVotacao permanece praticamente o mesmo
     private void encerrarVotacao() {
         this.votacaoAberta = false;
         System.out.println("\n-------------------------------------------");
@@ -90,9 +117,10 @@ public class Servidor {
 
         for (Map.Entry<Integer, AtomicInteger> entry : votos.entrySet()) {
             Candidato c = candidatos.get(entry.getKey());
+            if (c == null) continue; // Pode haver votos para candidatos removidos, embora a lógica os remova
             int numVotos = entry.getValue().get();
             double percentual = (double) numVotos / totalVotos * 100.0;
-            System.out.printf("   - %s: %d votos (%.2f%%)\n", c.getNome(), numVotos, percentual);
+            System.out.printf("    - %s: %d votos (%.2f%%)\n", c.getNome(), numVotos, percentual);
 
             if (numVotos > maxVotos) {
                 maxVotos = numVotos;
@@ -122,7 +150,7 @@ public class Servidor {
     public void enviarNotaMulticast(String nota) {
         try (DatagramSocket socket = new DatagramSocket()) {
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
-            String mensagemCompleta = "[NOTA DO ADMIN]: " + nota;
+            String mensagemCompleta = "[NOTA DO SISTEMA]: " + nota; // Ajustado para ser mais genérico
             byte[] buffer = mensagemCompleta.getBytes();
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, MULTICAST_PORT);

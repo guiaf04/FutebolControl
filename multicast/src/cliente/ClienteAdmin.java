@@ -25,9 +25,8 @@ public class ClienteAdmin {
 
             System.out.println("--- PAINEL DE ADMINISTRAÇÃO ---");
 
-            // A chamada para realizarLogin agora será feita dentro de um loop
             String tipoUsuario = realizarLogin(scanner, in, out);
-            if (tipoUsuario == null || !"ADMIN".equals(tipoUsuario)) { // Se não logar como admin ou sair
+            if (tipoUsuario == null || !"ADMIN".equals(tipoUsuario)) {
                 System.out.println("Encerrando o cliente.");
                 return;
             }
@@ -39,18 +38,17 @@ public class ClienteAdmin {
         }
     }
 
-    // O método realizarLogin agora retorna o tipo de usuário ou null
     private static String realizarLogin(Scanner scanner, DataInputStream in, DataOutputStream out) throws IOException {
         String login;
         String senha;
         Mensagem response;
-        String tipoUsuarioLogado = null; // Para armazenar o tipo de usuário logado
+        String tipoUsuarioLogado = null; 
 
         while (true) {
             System.out.print("Login (admin, digite 'sair' para encerrar): ");
             login = scanner.nextLine();
             if (login.equalsIgnoreCase("sair")) {
-                return null; // O usuário decidiu sair
+                return null;
             }
 
             System.out.print("Senha (admin): ");
@@ -65,7 +63,7 @@ public class ClienteAdmin {
                 tipoUsuarioLogado = (String) response.getPayload().get("tipo_usuario");
                 if ("ADMIN".equals(tipoUsuarioLogado)) {
                     System.out.println("Login de administrador realizado com sucesso!\n");
-                    return tipoUsuarioLogado; // Retorna o tipo de usuário logado (ADMIN)
+                    return tipoUsuarioLogado;
                 } else {
                     System.err.println("Login bem-sucedido, mas o usuário não é um administrador. Tente novamente com um login de admin.");
                 }
@@ -75,15 +73,14 @@ public class ClienteAdmin {
         }
     }
     
-    // ... (o restante do código de ClienteAdmin.java permanece o mesmo)
-    // menuAdmin, addCandidato, removeCandidato, enviarNota
     private static void menuAdmin(Scanner scanner, DataInputStream in, DataOutputStream out) throws IOException {
         while (true) {
             System.out.println("\nOpções de Administrador:");
             System.out.println("1. Adicionar Candidato");
             System.out.println("2. Remover Candidato");
             System.out.println("3. Enviar Nota Informativa (Multicast)");
-            System.out.println("4. Sair");
+            System.out.println("4. Iniciar Nova Votação"); // NOVO: Opção para iniciar votação
+            System.out.println("5. Sair");
             System.out.print(">> ");
             String escolha = scanner.nextLine();
 
@@ -97,7 +94,10 @@ public class ClienteAdmin {
                 case "3":
                     enviarNota(scanner, in, out);
                     break;
-                case "4":
+                case "4": // NOVO: Lógica para iniciar nova votação
+                    iniciarNovaVotacao(in, out);
+                    break;
+                case "5":
                     System.out.println("Saindo do painel de admin.");
                     return;
                 default:
@@ -142,6 +142,16 @@ public class ClienteAdmin {
         String nota = scanner.nextLine();
         
         Mensagem request = new Mensagem("ENVIAR_NOTA", Map.of("nota", nota));
+        out.writeUTF(gson.toJson(request));
+        
+        Mensagem response = gson.fromJson(in.readUTF(), Mensagem.class);
+        System.out.println("Status: " + response.getPayload().get("mensagem"));
+    }
+
+    // NOVO: Método para enviar requisição de iniciar nova votação
+    private static void iniciarNovaVotacao(DataInputStream in, DataOutputStream out) throws IOException {
+        System.out.println("Solicitando ao servidor o início de uma nova votação...");
+        Mensagem request = new Mensagem("INICIAR_VOTACAO", null); // Não precisa de payload
         out.writeUTF(gson.toJson(request));
         
         Mensagem response = gson.fromJson(in.readUTF(), Mensagem.class);

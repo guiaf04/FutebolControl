@@ -61,7 +61,7 @@ public class ClientHandler extends Thread {
             case "LOGIN":
                 return handleLogin(payload);
             case "LISTAR_CANDIDATOS":
-                 return new Mensagem("LISTA_CANDIDATOS", Map.of("candidatos", servidor.getListaCandidatos()));
+                return new Mensagem("LISTA_CANDIDATOS", Map.of("candidatos", servidor.getListaCandidatos()));
             case "VOTAR":
                 return handleVotar(payload);
             case "ADD_CANDIDATO":
@@ -70,6 +70,8 @@ public class ClientHandler extends Thread {
                 return handleRemoveCandidato(payload);
             case "ENVIAR_NOTA":
                 return handleEnviarNota(payload);
+            case "INICIAR_VOTACAO": // NOVO: Lidar com a requisição de iniciar votação
+                return handleIniciarVotacao();
             default:
                 return new Mensagem("ERRO", Map.of("mensagem", "Tipo de requisição inválida."));
         }
@@ -119,7 +121,7 @@ public class ClientHandler extends Thread {
     // Métodos para Admin
     private Mensagem handleAddCandidato(Map<String, Object> payload) {
         if (usuarioLogado.getTipo() != Usuario.TipoUsuario.ADMIN) {
-             return new Mensagem("ERRO", Map.of("mensagem", "Acesso negado."));
+            return new Mensagem("ERRO", Map.of("mensagem", "Acesso negado."));
         }
         String nome = (String) payload.get("nome");
         String partido = (String) payload.get("partido");
@@ -130,26 +132,35 @@ public class ClientHandler extends Thread {
     }
 
     private Mensagem handleRemoveCandidato(Map<String, Object> payload) {
-         if (usuarioLogado.getTipo() != Usuario.TipoUsuario.ADMIN) {
-             return new Mensagem("ERRO", Map.of("mensagem", "Acesso negado."));
+        if (usuarioLogado.getTipo() != Usuario.TipoUsuario.ADMIN) {
+            return new Mensagem("ERRO", Map.of("mensagem", "Acesso negado."));
         }
         Double idCandidatoDouble = (Double) payload.get("id_candidato");
         int idCandidato = idCandidatoDouble.intValue();
 
         if (servidor.getCandidatos().remove(idCandidato) != null) {
-            servidor.getVotos().remove(idCandidato);
+            servidor.getVotos().remove(idCandidato); // Remove também os votos
             return new Mensagem("CANDIDATO_REMOVIDO", Map.of("mensagem", "Candidato removido com sucesso."));
         } else {
-             return new Mensagem("ERRO", Map.of("mensagem", "Candidato não encontrado."));
+            return new Mensagem("ERRO", Map.of("mensagem", "Candidato não encontrado."));
         }
     }
     
     private Mensagem handleEnviarNota(Map<String, Object> payload) {
         if (usuarioLogado.getTipo() != Usuario.TipoUsuario.ADMIN) {
-             return new Mensagem("ERRO", Map.of("mensagem", "Acesso negado."));
+            return new Mensagem("ERRO", Map.of("mensagem", "Acesso negado."));
         }
         String nota = (String) payload.get("nota");
         servidor.enviarNotaMulticast(nota);
         return new Mensagem("NOTA_ENVIADA", Map.of("mensagem", "Nota informativa enviada a todos os clientes."));
+    }
+
+    // NOVO: Método para lidar com a requisição de iniciar votação
+    private Mensagem handleIniciarVotacao() {
+        if (usuarioLogado == null || usuarioLogado.getTipo() != Usuario.TipoUsuario.ADMIN) {
+            return new Mensagem("ERRO", Map.of("mensagem", "Acesso negado. Somente administradores podem iniciar votações."));
+        }
+        servidor.iniciarNovaVotacaoAdmin(); // Chama o método no servidor
+        return new Mensagem("VOTACAO_INICIADA", Map.of("mensagem", "Nova votação iniciada com sucesso!"));
     }
 }
