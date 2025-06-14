@@ -1,20 +1,25 @@
 package org.example.client;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.example.model.Clube;
 import org.example.model.Partida;
 import org.example.shared.CampeonatoManager;
 
+import java.lang.reflect.Type;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Client {
+  Gson gson = new Gson();
   public static void main(String[] args) {
     try {
       Registry registry = LocateRegistry.getRegistry("localhost", 1099);
       CampeonatoManager manager = (CampeonatoManager) registry.lookup("CampeonatoService");
-
+      Client client = new Client();
       System.out.println("Cliente conectado ao servidor RMI.");
 
       Scanner scanner = new Scanner(System.in);
@@ -26,16 +31,16 @@ public class Client {
 
         switch (choice) {
           case 1:
-            adicionarClube(manager, scanner);
+            client.adicionarClube(manager, scanner);
             break;
           case 2:
-            listarClubes(manager);
+            client.listarClubes(manager);
             break;
           case 3:
-            buscarClube(manager, scanner);
+            client.buscarClube(manager, scanner);
             break;
           case 4:
-            registrarPartida(manager, scanner);
+            client.registrarPartida(manager, scanner);
             break;
           case 5:
             System.out.println("Saindo...");
@@ -61,7 +66,7 @@ public class Client {
     System.out.print("Escolha uma opção: ");
   }
 
-  private static void adicionarClube(CampeonatoManager manager, Scanner scanner) throws Exception {
+  private void adicionarClube(CampeonatoManager manager, Scanner scanner) throws Exception {
     System.out.print("Nome do clube: ");
     String nome = scanner.nextLine();
     System.out.print("Cidade: ");
@@ -73,12 +78,23 @@ public class Client {
     String estadio = scanner.nextLine();
 
     Clube novoClube = new Clube(nome, cidade, ano, estadio, 0);
-    manager.adicionarClube(novoClube);
+    String novoClubeJSon = this.gson.toJson(novoClube);
+    manager.adicionarClube(novoClubeJSon);
     System.out.println("Clube enviado para o servidor.");
   }
 
-  private static void listarClubes(CampeonatoManager manager) throws Exception {
-    List<Clube> clubes = manager.listarClubes();
+  private void listarClubes(CampeonatoManager manager) throws Exception {
+    String jsonClubes = manager.listarClubes();
+
+    if (jsonClubes == null || jsonClubes.trim().isEmpty()) {
+      System.out.println("Nenhum clube cadastrado no servidor.");
+      return;
+    }
+
+    Type tipoListaClubes = new TypeToken<ArrayList<Clube>>() {}.getType();
+
+    List<Clube> clubes = gson.fromJson(jsonClubes, tipoListaClubes);
+
     if (clubes.isEmpty()) {
       System.out.println("Nenhum clube cadastrado.");
     } else {
@@ -90,10 +106,10 @@ public class Client {
     }
   }
 
-  private static void buscarClube(CampeonatoManager manager, Scanner scanner) throws Exception {
+  private void buscarClube(CampeonatoManager manager, Scanner scanner) throws Exception {
     System.out.print("Digite o nome do clube a buscar: ");
     String nome = scanner.nextLine();
-    Clube clube = manager.buscarClubePorNome(nome);
+    Clube clube = gson.fromJson(manager.buscarClubePorNome(nome), Clube.class);
     if (clube != null) {
       System.out.println("\n--- Informações do Clube ---");
       System.out.println(clube.exibirInformacoes());
@@ -102,14 +118,14 @@ public class Client {
     }
   }
 
-  private static void registrarPartida(CampeonatoManager manager, Scanner scanner) throws Exception {
+  private void registrarPartida(CampeonatoManager manager, Scanner scanner) throws Exception {
     System.out.print("Nome do clube mandante: ");
     String nomeMandante = scanner.nextLine();
-    Clube mandante = manager.buscarClubePorNome(nomeMandante);
+    Clube mandante = gson.fromJson(manager.buscarClubePorNome(nomeMandante), Clube.class);
 
     System.out.print("Nome do clube visitante: ");
     String nomeVisitante = scanner.nextLine();
-    Clube visitante = manager.buscarClubePorNome(nomeVisitante);
+    Clube visitante = gson.fromJson(manager.buscarClubePorNome(nomeVisitante), Clube.class);
 
     if(mandante == null || visitante == null) {
       System.out.println("Um ou ambos os clubes não foram encontrados. Crie-os primeiro.");
@@ -125,7 +141,7 @@ public class Client {
     scanner.nextLine();
 
     Partida partida = new Partida(0, mandante, visitante, data, "", golsMandante, golsVisitante);
-    String confirmacao = manager.registrarPartida(partida);
+    String confirmacao = manager.registrarPartida(gson.toJson(partida));
     System.out.println("Resposta do servidor: " + confirmacao);
   }
 }

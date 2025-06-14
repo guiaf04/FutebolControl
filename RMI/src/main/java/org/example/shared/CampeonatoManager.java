@@ -1,5 +1,6 @@
 package org.example.shared;
 
+import com.google.gson.Gson;
 import org.example.model.Clube;
 import org.example.model.Partida;
 import java.rmi.Remote;
@@ -12,14 +13,14 @@ public interface CampeonatoManager extends Remote {
    * @param clube O objeto Clube a ser adicionado.
    * @throws RemoteException
    */
-  void adicionarClube(Clube clube) throws RemoteException;
+  void adicionarClube(String clube) throws RemoteException;
 
   /**
    * Lista todos os clubes cadastrados.
    * @return Uma lista de objetos Clube.
    * @throws RemoteException
    */
-  List<Clube> listarClubes() throws RemoteException;
+  String listarClubes() throws RemoteException;
 
   /**
    * Busca um clube pelo seu nome.
@@ -27,7 +28,7 @@ public interface CampeonatoManager extends Remote {
    * @return O objeto Clube encontrado ou null.
    * @throws RemoteException
    */
-  Clube buscarClubePorNome(String nome) throws RemoteException;
+  String buscarClubePorNome(String nome) throws RemoteException;
 
   /**
    * Registra uma nova partida no sistema.
@@ -35,7 +36,7 @@ public interface CampeonatoManager extends Remote {
    * @return Uma confirmação em String.
    * @throws RemoteException
    */
-  String registrarPartida(Partida partida) throws RemoteException;
+  String registrarPartida(String partida) throws RemoteException;
 
   /**
    * Atualiza as informações de um clube existente.
