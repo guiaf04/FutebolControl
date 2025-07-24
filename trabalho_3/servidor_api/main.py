@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from typing import List, Dict, Optional
+from models import Clube, Campeonato, Partida
 
 app = FastAPI()
 
@@ -13,42 +13,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =====================
-# MODELOS DE DADOS
-# =====================
-
-class Clube(BaseModel):
-    nome: str
-    sigla: str
-    vitorias: int = 0
-    empates: int = 0
-    derrotas: int = 0
-    gols_pro: int = 0
-    gols_contra: int = 0
-
-class Campeonato(BaseModel):
-    nome: str
-    ano: int
-    clubes: List[str] = []
-
-class Partida(BaseModel):
-    sigla_clube1: str
-    sigla_clube2: str
-    gols1: int
-    gols2: int
-    campeonato: str
-
-# =====================
-# DADOS EM MEMÓRIA
-# =====================
-
 clubes: Dict[str, Clube] = {}
 campeonatos: Dict[str, Campeonato] = {}
 partidas: List[Partida] = []
-
-# =====================
-# ROTAS
-# =====================
 
 @app.post("/clubes")
 def criar_clube(clube: Clube):
