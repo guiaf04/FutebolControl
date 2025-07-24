@@ -1,9 +1,10 @@
-package services;
+package com.futebol.services;
 
-import models.Clube;
-import models.Campeonato;
-import models.Partida;
-import utils.JsonUtils;
+import com.futebol.models.Clube;
+import com.futebol.models.Campeonato;
+import com.futebol.models.Partida;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -12,12 +13,14 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.lang.reflect.Type;
 
 /**
  * Serviço para comunicação com a API do servidor
  */
 public class ApiService {
     private final String baseUrl;
+    private final Gson gson;
 
     public ApiService() {
         this("http://localhost:8000");
@@ -25,6 +28,7 @@ public class ApiService {
 
     public ApiService(String baseUrl) {
         this.baseUrl = baseUrl;
+        this.gson = new Gson();
     }
 
     // ==================== MÉTODOS HTTP BÁSICOS ====================
@@ -111,18 +115,15 @@ public class ApiService {
     // ==================== MÉTODOS DE CLUBES ====================
 
     public ApiResponse criarClube(Clube clube) {
-        return sendPost("/clubes", clube.toJson());
+        return sendPost("/clubes", gson.toJson(clube));
     }
 
     public ApiResponse<List<Clube>> listarClubes() {
         ApiResponse response = sendGet("/clubes");
         if (response.isSuccess()) {
-            List<Clube> clubes = new ArrayList<>();
             String data = (String) response.getData();
-            List<String> clubeJsons = JsonUtils.extractJsonObjects(data);
-            for (String clubeJson : clubeJsons) {
-                clubes.add(Clube.fromJson(clubeJson));
-            }
+            Type listType = new TypeToken<List<Clube>>(){}.getType();
+            List<Clube> clubes = gson.fromJson(data, listType);
             return new ApiResponse<>(true, "Sucesso", clubes);
         }
         return new ApiResponse<>(false, response.getMessage(), new ArrayList<>());
@@ -132,7 +133,7 @@ public class ApiService {
         ApiResponse response = sendGet("/clubes/estatisticas?sigla=" + sigla);
         if (response.isSuccess()) {
             String data = (String) response.getData();
-            Clube clube = Clube.fromJson(data);
+            Clube clube = gson.fromJson(data, Clube.class);
             return new ApiResponse<>(true, "Sucesso", clube);
         }
         return new ApiResponse<>(false, response.getMessage(), null);
@@ -141,7 +142,7 @@ public class ApiService {
     public ApiResponse atualizarClube(String siglaOriginal, Clube clube) {
         try {
             String endpoint = "/clubes?sigla_original=" + URLEncoder.encode(siglaOriginal, "UTF-8");
-            return sendPut(endpoint, clube.toJson());
+            return sendPut(endpoint, gson.toJson(clube));
         } catch (UnsupportedEncodingException e) {
             return new ApiResponse(false, "Erro de codificação: " + e.getMessage(), "");
         }
@@ -161,12 +162,9 @@ public class ApiService {
             String endpoint = "/clubes/partidas?sigla=" + URLEncoder.encode(sigla, "UTF-8");
             ApiResponse response = sendGet(endpoint);
             if (response.isSuccess()) {
-                List<Partida> partidas = new ArrayList<>();
                 String data = (String) response.getData();
-                List<String> partidaJsons = JsonUtils.extractJsonObjects(data);
-                for (String partidaJson : partidaJsons) {
-                    partidas.add(Partida.fromJson(partidaJson));
-                }
+                Type listType = new TypeToken<List<Partida>>(){}.getType();
+                List<Partida> partidas = gson.fromJson(data, listType);
                 return new ApiResponse<>(true, "Sucesso", partidas);
             }
             return new ApiResponse<>(false, response.getMessage(), new ArrayList<>());
@@ -178,18 +176,15 @@ public class ApiService {
     // ==================== MÉTODOS DE CAMPEONATOS ====================
 
     public ApiResponse criarCampeonato(Campeonato campeonato) {
-        return sendPost("/campeonatos", campeonato.toJson());
+        return sendPost("/campeonatos", gson.toJson(campeonato));
     }
 
     public ApiResponse<List<Campeonato>> listarCampeonatos() {
         ApiResponse response = sendGet("/campeonatos");
         if (response.isSuccess()) {
-            List<Campeonato> campeonatos = new ArrayList<>();
             String data = (String) response.getData();
-            List<String> campeonatoJsons = JsonUtils.extractJsonObjects(data);
-            for (String campeonatoJson : campeonatoJsons) {
-                campeonatos.add(Campeonato.fromJson(campeonatoJson));
-            }
+            Type listType = new TypeToken<List<Campeonato>>(){}.getType();
+            List<Campeonato> campeonatos = gson.fromJson(data, listType);
             return new ApiResponse<>(true, "Sucesso", campeonatos);
         }
         return new ApiResponse<>(false, response.getMessage(), new ArrayList<>());
@@ -198,7 +193,7 @@ public class ApiService {
     public ApiResponse atualizarCampeonato(String nomeOriginal, Campeonato campeonato) {
         try {
             String endpoint = "/campeonatos?nome_original=" + URLEncoder.encode(nomeOriginal, "UTF-8");
-            return sendPut(endpoint, campeonato.toJson());
+            return sendPut(endpoint, gson.toJson(campeonato));
         } catch (UnsupportedEncodingException e) {
             return new ApiResponse(false, "Erro de codificação: " + e.getMessage(), "");
         }
@@ -229,12 +224,9 @@ public class ApiService {
             String endpoint = "/campeonatos/clubes_participantes?nome=" + URLEncoder.encode(nome, "UTF-8");
             ApiResponse response = sendGet(endpoint);
             if (response.isSuccess()) {
-                List<Clube> clubes = new ArrayList<>();
                 String data = (String) response.getData();
-                List<String> clubeJsons = JsonUtils.extractJsonObjects(data);
-                for (String clubeJson : clubeJsons) {
-                    clubes.add(Clube.fromJson(clubeJson));
-                }
+                Type listType = new TypeToken<List<Clube>>(){}.getType();
+                List<Clube> clubes = gson.fromJson(data, listType);
                 return new ApiResponse<>(true, "Sucesso", clubes);
             }
             return new ApiResponse<>(false, response.getMessage(), new ArrayList<>());
@@ -246,7 +238,7 @@ public class ApiService {
     // ==================== MÉTODOS DE PARTIDAS ====================
 
     public ApiResponse registrarPartida(Partida partida) {
-        return sendPost("/partidas", partida.toJson());
+        return sendPost("/partidas", gson.toJson(partida));
     }
 
     // ==================== CLASSE INTERNA PARA RESPOSTA ====================

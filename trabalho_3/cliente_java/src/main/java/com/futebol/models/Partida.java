@@ -1,14 +1,23 @@
-package models;
+package com.futebol.models;
+
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Classe que representa uma partida de futebol
  */
 public class Partida {
+    @SerializedName("sigla_clube1")
     private String siglaClube1;
+    
+    @SerializedName("sigla_clube2")
     private String siglaClube2;
+    
     private int gols1;
     private int gols2;
     private String campeonato;
+
+    private static final Gson gson = new Gson();
 
     // Enums para resultado
     public enum Resultado {
@@ -44,7 +53,7 @@ public class Partida {
     public String getCampeonato() { return campeonato; }
     public void setCampeonato(String campeonato) { this.campeonato = campeonato; }
 
-    // Métodos de análise da partida
+    // Métodos calculados
     public Resultado getResultado() {
         if (gols1 > gols2) {
             return Resultado.VITORIA_CLUBE1;
@@ -62,8 +71,9 @@ public class Partida {
                 return siglaClube1;
             case VITORIA_CLUBE2:
                 return siglaClube2;
+            case EMPATE:
             default:
-                return null; // Empate
+                return "EMPATE";
         }
     }
 
@@ -74,78 +84,42 @@ public class Partida {
                 return siglaClube2;
             case VITORIA_CLUBE2:
                 return siglaClube1;
+            case EMPATE:
             default:
-                return null; // Empate
+                return "EMPATE";
         }
-    }
-
-    public boolean isEmpate() {
-        return gols1 == gols2;
     }
 
     public int getTotalGols() {
         return gols1 + gols2;
     }
 
-    public boolean temClube(String siglaClube) {
-        return siglaClube1.equals(siglaClube) || siglaClube2.equals(siglaClube);
+    public boolean isEmpate() {
+        return gols1 == gols2;
     }
 
-    // Métodos de conversão JSON
+    // Métodos de validação
+    public boolean isValid() {
+        return siglaClube1 != null && !siglaClube1.trim().isEmpty() &&
+               siglaClube2 != null && !siglaClube2.trim().isEmpty() &&
+               !siglaClube1.equals(siglaClube2) &&
+               gols1 >= 0 && gols2 >= 0 &&
+               campeonato != null && !campeonato.trim().isEmpty();
+    }
+
+    // Métodos JSON usando Gson
     public String toJson() {
-        return String.format(
-            "{\"sigla_clube1\":\"%s\", \"sigla_clube2\":\"%s\", \"gols1\":%d, \"gols2\":%d, \"campeonato\":\"%s\"}",
-            siglaClube1, siglaClube2, gols1, gols2, campeonato
-        );
+        return gson.toJson(this);
     }
 
-    /**
-     * Cria um objeto Partida a partir de uma string JSON simples
-     * Nota: Esta é uma implementação simplificada para evitar dependências externas
-     */
     public static Partida fromJson(String json) {
-        Partida partida = new Partida();
-        
-        // Parse simples do JSON (sem biblioteca externa)
-        json = json.trim();
-        if (json.startsWith("{") && json.endsWith("}")) {
-            json = json.substring(1, json.length() - 1);
-            String[] pairs = json.split(",");
-            
-            for (String pair : pairs) {
-                String[] keyValue = pair.split(":", 2);
-                if (keyValue.length == 2) {
-                    String key = keyValue[0].trim().replaceAll("\"", "");
-                    String value = keyValue[1].trim().replaceAll("\"", "");
-                    
-                    switch (key) {
-                        case "sigla_clube1":
-                            partida.setSiglaClube1(value);
-                            break;
-                        case "sigla_clube2":
-                            partida.setSiglaClube2(value);
-                            break;
-                        case "gols1":
-                            partida.setGols1(Integer.parseInt(value));
-                            break;
-                        case "gols2":
-                            partida.setGols2(Integer.parseInt(value));
-                            break;
-                        case "campeonato":
-                            partida.setCampeonato(value);
-                            break;
-                    }
-                }
-            }
-        }
-        
-        return partida;
+        return gson.fromJson(json, Partida.class);
     }
 
     @Override
     public String toString() {
-        return String.format("%s %d x %d %s (%s)", 
-                           siglaClube1, gols1, gols2, siglaClube2, campeonato);
+        return String.format("Partida{%s %d x %d %s, campeonato='%s', resultado=%s}",
+                siglaClube1, gols1, gols2, siglaClube2, campeonato, getResultado());
     }
 
     @Override
@@ -153,20 +127,19 @@ public class Partida {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Partida partida = (Partida) obj;
-        return gols1 == partida.gols1 &&
-               gols2 == partida.gols2 &&
-               siglaClube1.equals(partida.siglaClube1) &&
-               siglaClube2.equals(partida.siglaClube2) &&
-               campeonato.equals(partida.campeonato);
+        return gols1 == partida.gols1 && gols2 == partida.gols2 &&
+               siglaClube1 != null && siglaClube1.equals(partida.siglaClube1) &&
+               siglaClube2 != null && siglaClube2.equals(partida.siglaClube2) &&
+               campeonato != null && campeonato.equals(partida.campeonato);
     }
 
     @Override
     public int hashCode() {
-        int result = siglaClube1.hashCode();
-        result = 31 * result + siglaClube2.hashCode();
+        int result = siglaClube1 != null ? siglaClube1.hashCode() : 0;
+        result = 31 * result + (siglaClube2 != null ? siglaClube2.hashCode() : 0);
         result = 31 * result + gols1;
         result = 31 * result + gols2;
-        result = 31 * result + campeonato.hashCode();
+        result = 31 * result + (campeonato != null ? campeonato.hashCode() : 0);
         return result;
     }
 }

@@ -1,10 +1,10 @@
-package ui;
+package com.futebol.ui;
 
-import models.Clube;
-import models.Campeonato;
-import models.Partida;
-import services.ApiService;
-import services.ApiService.ApiResponse;
+import com.futebol.models.Clube;
+import com.futebol.models.Campeonato;
+import com.futebol.models.Partida;
+import com.futebol.services.ApiService;
+import com.futebol.services.ApiService.ApiResponse;
 
 import javax.swing.*;
 import java.awt.*;
