@@ -27,3 +27,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### abiente virtual ###
+.env
+.venv
+env/
+venv/
